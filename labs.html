@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Labs | RFL Studio</title>
+<meta name="description" content="RFL Studio에서 직접 만든 AI 실용 툴 모음. 프롬프트 빌더, 직업상담사 학습, 엑셀 자동화 등 e커머스와 일상에서 바로 쓰는 도구들."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#f7f9fb",
+        "surface-low": "#f2f4f6",
+        "surface-card": "#ffffff",
+        "on-surface": "#191c1e",
+        "on-muted": "#434655",
+        "primary": "#004ac6",
+        "secondary": "#712ae2",
+        "tertiary": "#006242",
+        "outline": "#c3c6d7",
+      },
+      fontFamily: {
+        "display": ["Manrope","sans-serif"],
+        "body": ["Noto Sans KR","sans-serif"],
+      }
+    }
+  }
+}
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Noto Sans KR', sans-serif; background: #f7f9fb; color: #191c1e; margin: 0; }
+
+.glass-nav {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(247,249,251,0.82);
+  border-bottom: 1px solid rgba(195,198,215,0.3);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #004ac6 0%, #712ae2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* HERO */
+.labs-hero {
+  background: linear-gradient(160deg, #0f1729 0%, #1a0a35 50%, #0a2010 100%);
+  position: relative;
+  overflow: hidden;
+}
+.labs-hero::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,74,198,0.18) 0%, transparent 65%);
+  pointer-events: none;
+}
+.labs-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: 20%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(113,42,226,0.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+.grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* BADGES */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  font-family: 'Manrope', sans-serif;
+}
+.badge-done   { background: rgba(0,98,66,0.12); color: #006242; border: 1px solid rgba(0,98,66,0.2); }
+.badge-beta   { background: rgba(113,42,226,0.1); color: #712ae2; border: 1px solid rgba(113,42,226,0.2); }
+.badge-soon   { background: rgba(180,130,0,0.1); color: #8a6000; border: 1px solid rgba(180,130,0,0.2); }
+.badge-light  { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.15); }
+
+/* FILTER TABS */
+.filter-tab {
+  padding: 7px 18px; border-radius: 8px;
+  font-size: 12px; font-weight: 600; font-family: 'Manrope', sans-serif;
+  border: 1.5px solid #e0e3e8;
+  background: #fff; color: #434655;
+  cursor: pointer; transition: all 0.15s;
+  white-space: nowrap;
+}
+.filter-tab:hover { border-color: #004ac6; color: #004ac6; }
+.filter-tab.active {
+  background: #004ac6; color: #fff;
+  border-color: #004ac6;
+}
+
+/* TOOL CARDS */
+.tool-card {
+  background: #fff;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  box-shadow: 0 2px 16px rgba(25,28,30,0.05);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.tool-card:hover {
+  box-shadow: 0 12px 40px rgba(25,28,30,0.1);
+  transform: translateY(-2px);
+}
+.tool-card.primary:hover  { border-color: rgba(0,74,198,0.25); }
+.tool-card.secondary:hover { border-color: rgba(113,42,226,0.25); }
+.tool-card.tertiary:hover  { border-color: rgba(0,98,66,0.25); }
+.tool-card.disabled { opacity: 0.65; cursor: default; }
+.tool-card.disabled:hover { transform: none; box-shadow: 0 2px 16px rgba(25,28,30,0.05); }
+
+.tool-card-header {
+  padding: 28px 28px 0;
+}
+.tool-icon-wrap {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+}
+.tool-card-body { padding: 16px 28px 24px; flex: 1; display: flex; flex-direction: column; }
+.tool-card-footer { padding: 18px 28px; border-top: 1px solid #f2f4f6; }
+
+/* LAUNCH BTN */
+.btn-launch {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border-radius: 9px;
+  font-weight: 700; font-size: 13px; font-family: 'Manrope', sans-serif;
+  text-decoration: none; transition: all 0.15s;
+  border: none; cursor: pointer;
+}
+.btn-launch-primary { background: #004ac6; color: #fff; }
+.btn-launch-primary:hover { background: #003ea8; }
+.btn-launch-secondary { background: #712ae2; color: #fff; }
+.btn-launch-secondary:hover { background: #5a00c6; }
+.btn-launch-tertiary { background: #006242; color: #fff; }
+.btn-launch-tertiary:hover { background: #004d33; }
+.btn-launch-disabled { background: #f2f4f6; color: #999; cursor: not-allowed; }
+
+.btn-ghost-sm {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 9px;
+  font-weight: 600; font-size: 12px; font-family: 'Manrope', sans-serif;
+  text-decoration: none; transition: all 0.15s;
+  background: transparent; color: #004ac6;
+  border: 1.5px solid rgba(0,74,198,0.25);
+}
+.btn-ghost-sm:hover { background: rgba(0,74,198,0.05); border-color: rgba(0,74,198,0.5); }
+
+/* UPLOAD ZONE */
+.upload-zone {
+  border: 2px dashed #c3c6d7;
+  border-radius: 14px;
+  padding: 32px;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: pointer;
+  background: #fafbfc;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: #004ac6;
+  background: rgba(0,74,198,0.03);
+}
+.upload-zone input[type=file] { display: none; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(25,28,30,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%; max-width: 560px;
+  box-shadow: 0 24px 64px rgba(25,28,30,0.2);
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.25s;
+  overflow: hidden;
+}
+.modal-overlay.open .modal-box { transform: scale(1) translateY(0); }
+.modal-header {
+  background: linear-gradient(135deg, #004ac6 0%, #712ae2 100%);
+  padding: 24px 28px;
+  color: #fff;
+}
+.modal-body { padding: 28px; }
+
+/* TOOL VIEWER */
+.tool-viewer-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,41,0.9);
+  backdrop-filter: blur(8px);
+  z-index: 300;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.tool-viewer-overlay.open { opacity: 1; pointer-events: all; }
+.tool-viewer-bar {
+  background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0;
+}
+.tool-viewer-frame {
+  flex: 1; background: #fff; border: none; width: 100%;
+}
+
+/* SECTION LABEL */
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+  text-transform: uppercase; color: #434655; font-family: 'Manrope', sans-serif;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::after { content: ''; flex: 1; max-width: 48px; height: 1px; background: #c3c6d7; }
+
+/* ANIMATE */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.55s ease both; }
+.d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.12s; }
+.d3 { animation-delay: 0.18s; } .d4 { animation-delay: 0.24s; }
+
+/* NAV LINK */
+.nav-link { font-family: 'Manrope',sans-serif; font-size: 13px; font-weight: 500; color: #434655; text-decoration: none; transition: color 0.15s; }
+.nav-link:hover { color: #004ac6; }
+.nav-link.active { color: #004ac6; border-bottom: 2px solid #004ac6; padding-bottom: 2px; }
+
+/* FOOTER */
+footer { background: #191c1e; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="glass-nav fixed top-0 w-full z-50">
+  <div style="max-width:1152px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
+    <a href="index.html" style="font-family:'Manrope',sans-serif;font-weight:900;font-size:20px;letter-spacing:-0.03em;text-decoration:none;color:#191c1e;">RFL<span class="gradient-text">.</span></a>
+    <div style="display:flex;gap:28px;align-items:center;" class="hidden md:flex">
+      <a href="index.html" class="nav-link">홈</a>
+      <a href="about.html" class="nav-link">어바웃</a>
+      <a href="labs.html" class="nav-link active">Labs</a>
+      <a href="news.html" class="nav-link">뉴스</a>
+      <a href="https://blog.naver.com" target="_blank" class="nav-link">블로그</a>
+    </div>
+    <a href="about.html#contact" style="display:inline-flex;align-items:center;gap:6px;background:#004ac6;color:#fff;padding:9px 20px;border-radius:9px;font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;text-decoration:none;">문의하기</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="labs-hero" style="padding: 144px 0 80px;">
+  <div class="grid-lines"></div>
+  <div style="max-width:1152px;margin:0 auto;padding:0 24px;position:relative;z-index:1;">
+    <div class="fade-up">
+      <span class="badge badge-light" style="margin-bottom:20px;display:inline-flex;">RFL Labs</span>
+    </div>
+    <h1 class="fade-up d1" style="font-family:'Manrope',sans-serif;font-weight:900;font-size:clamp(2.4rem,5vw,3.8rem);line-height:1.05;letter-spacing:-0.03em;color:#fff;margin:0 0 20px;">
+      직접 만든<br/><span style="background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">AI 실용 도구</span> 모음
+    </h1>
+    <p class="fade-up d2" style="color:rgba(255,255,255,0.55);font-size:16px;line-height:1.7;max-width:480px;margin:0 0 36px;">
+      e커머스 20년 경험과 AI를 결합해 만든 도구들.<br/>
+      로그인 후 바로 사용하거나, 자유롭게 둘러보세요.
+    </p>
+
+    <!-- HERO STATS -->
+    <div class="fade-up d3" style="display:flex;gap:32px;flex-wrap:wrap;">
+      <div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:28px;color:#fff;">4<span style="color:#60a5fa;">개</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">현재 툴 수</div>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+      <div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:28px;color:#fff;">3<span style="color:#a78bfa;">개</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">사용 가능</div>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+      <div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:28px;color:#fff;">무<span style="color:#4ade80;">료</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">현재 전체 무료</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FILTER + TOOLS -->
+<section style="padding:56px 0 80px;background:#f7f9fb;">
+  <div style="max-width:1152px;margin:0 auto;padding:0 24px;">
+
+    <!-- FILTER ROW -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px;flex-wrap:wrap;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="filterTabs">
+        <button class="filter-tab active" data-cat="all">전체</button>
+        <button class="filter-tab" data-cat="생산성">생산성</button>
+        <button class="filter-tab" data-cat="학습">학습</button>
+        <button class="filter-tab" data-cat="e커머스">e커머스</button>
+      </div>
+      <!-- UPLOAD BTN -->
+      <button onclick="openUploadModal()" style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:9px;border:1.5px solid rgba(0,74,198,0.25);background:#fff;color:#004ac6;font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        툴 파일 업로드
+      </button>
+    </div>
+
+    <!-- TOOL GRID -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;" id="toolGrid">
+
+      <!-- TOOL 1: 프롬프트 빌더 -->
+      <div class="tool-card primary fade-up d1" data-cat="생산성" data-tool="prompt">
+        <div class="tool-card-header">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+            <div class="tool-icon-wrap" style="background:rgba(0,74,198,0.08);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#004ac6" stroke-width="1.8"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            </div>
+            <span class="badge badge-done">완성</span>
+          </div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#004ac6;font-family:'Manrope',sans-serif;margin-bottom:6px;">생산성</div>
+        </div>
+        <div class="tool-card-body">
+          <h3 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:18px;color:#191c1e;margin:0 0 10px;">프롬프트 빌더</h3>
+          <p style="font-size:13px;color:#434655;line-height:1.7;margin:0 0 16px;flex:1;">AI에게 목적에 맞는 프롬프트를 구조적으로 설계하는 도구. 역할·맥락·출력형식을 단계별로 조립해 최적의 프롬프트를 완성합니다.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:#f0f4ff;color:#004ac6;font-family:'Manrope',sans-serif;font-weight:600;">프롬프트 설계</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:#f0f4ff;color:#004ac6;font-family:'Manrope',sans-serif;font-weight:600;">AI 활용</span>
+          </div>
+        </div>
+        <div class="tool-card-footer" style="display:flex;gap:10px;align-items:center;">
+          <button onclick="launchTool('prompt', '프롬프트 빌더')" class="btn-launch btn-launch-primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            바로 실행
+          </button>
+          <span id="prompt-status" style="font-size:11px;color:#888;font-family:'Manrope',sans-serif;">파일 미연결</span>
+        </div>
+      </div>
+
+      <!-- TOOL 2: 직업상담사 -->
+      <div class="tool-card secondary fade-up d2" data-cat="학습" data-tool="exam">
+        <div class="tool-card-header">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+            <div class="tool-icon-wrap" style="background:rgba(113,42,226,0.08);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#712ae2" stroke-width="1.8"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </div>
+            <span class="badge badge-done">완성</span>
+          </div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#712ae2;font-family:'Manrope',sans-serif;margin-bottom:6px;">학습</div>
+        </div>
+        <div class="tool-card-body">
+          <h3 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:18px;color:#191c1e;margin:0 0 10px;">직업상담사 2급 실기</h3>
+          <p style="font-size:13px;color:#434655;line-height:1.7;margin:0 0 16px;flex:1;">직업상담사 2급 실기 시험 대비 학습 도구. 핵심 이론과 기출 패턴을 체계적으로 정리하고 셀프 테스트로 실력을 점검합니다.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:#f5f0ff;color:#712ae2;font-family:'Manrope',sans-serif;font-weight:600;">자격증 학습</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:#f5f0ff;color:#712ae2;font-family:'Manrope',sans-serif;font-weight:600;">직업상담</span>
+          </div>
+        </div>
+        <div class="tool-card-footer" style="display:flex;gap:10px;align-items:center;">
+          <button onclick="launchTool('exam', '직업상담사 2급 실기')" class="btn-launch btn-launch-secondary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            바로 실행
+          </button>
+          <span id="exam-status" style="font-size:11px;color:#888;font-family:'Manrope',sans-serif;">파일 미연결</span>
+        </div>
+      </div>
+
+      <!-- TOOL 3: 엑셀파일 런처 -->
+      <div class="tool-card tertiary fade-up d3" data-cat="생산성" data-tool="excel">
+        <div class="tool-card-header">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+            <div class="tool-icon-wrap" style="background:rgba(0,98,66,0.08);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#006242" stroke-width="1.8"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span class="badge badge-done">완성</span>
+          </div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#006242;font-family:'Manrope',sans-serif;margin-bottom:6px;">생산성</div>
+        </div>
+        <div class="tool-card-body">
+          <h3 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:18px;color:#191c1e;margin:0 0 10px;">엑셀파일 런처</h3>
+          <p style="font-size:13px;color:#434655;line-height:1.7;margin:0 0 16px;flex:1;">반복적인 엑셀 작업을 자동화. 데이터 정리·변환·분석을 빠르게 처리하는 실무 도구로 업무 시간을 단축합니다.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:#f0fdf4;color:#006242;font-family:'Manrope',sans-serif;font-weight:600;">엑셀 자동화</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:#f0fdf4;color:#006242;font-family:'Manrope',sans-serif;font-weight:600;">데이터 처리</span>
+          </div>
+        </div>
+        <div class="tool-card-footer" style="display:flex;gap:10px;align-items:center;">
+          <button onclick="launchTool('excel', '엑셀파일 런처')" class="btn-launch btn-launch-tertiary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            바로 실행
+          </button>
+          <span id="excel-status" style="font-size:11px;color:#888;font-family:'Manrope',sans-serif;">파일 미연결</span>
+        </div>
+      </div>
+
+      <!-- TOOL 4: 미니 e커머스 관리 -->
+      <div class="tool-card disabled fade-up d4" data-cat="e커머스" data-tool="ecom">
+        <div class="tool-card-header">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+            <div class="tool-icon-wrap" style="background:#f2f4f6;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+            <span class="badge badge-soon">개발 예정</span>
+          </div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;font-family:'Manrope',sans-serif;margin-bottom:6px;">e커머스</div>
+        </div>
+        <div class="tool-card-body">
+          <h3 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:18px;color:#191c1e;margin:0 0 10px;">미니 e커머스 관리</h3>
+          <p style="font-size:13px;color:#434655;line-height:1.7;margin:0 0 16px;flex:1;">스마트스토어 운영을 위한 경량 관리 도구. 주문·재고·매출을 한 화면에서 관리하고 AI가 운영 인사이트를 제공합니다.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:#f2f4f6;color:#888;font-family:'Manrope',sans-serif;font-weight:600;">스마트스토어</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:#f2f4f6;color:#888;font-family:'Manrope',sans-serif;font-weight:600;">e커머스 관리</span>
+          </div>
+        </div>
+        <div class="tool-card-footer" style="display:flex;gap:10px;align-items:center;">
+          <button class="btn-launch btn-launch-disabled" disabled>준비 중</button>
+          <span style="font-size:11px;color:#bbb;font-family:'Manrope',sans-serif;">개발 진행 중</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ADD MORE HINT -->
+    <div style="margin-top:20px;padding:20px 24px;background:#fff;border-radius:14px;border:2px dashed #e0e3e8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#004ac6" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div>
+          <div style="font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;color:#191c1e;">새 툴 추가 예정</div>
+          <div style="font-size:11px;color:#888;margin-top:1px;">계속 업데이트됩니다</div>
+        </div>
+      </div>
+      <button onclick="openUploadModal()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1.5px solid rgba(0,74,198,0.2);background:transparent;color:#004ac6;font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">
+        파일 업로드
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="padding:48px 0;">
+  <div style="max-width:1152px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px;align-items:center;">
+    <div>
+      <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:18px;color:#fff;margin-bottom:4px;">RFL<span style="color:#b4c5ff;">.</span></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;">삶! 다시 재창조를 하다</div>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <a href="index.html" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">홈</a>
+      <a href="about.html" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">어바웃</a>
+      <a href="labs.html"  style="font-size:12px;color:rgba(255,255,255,0.8);text-decoration:none;">Labs</a>
+      <a href="news.html"  style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">뉴스</a>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.25);">© 2025 RFL Studio</div>
+  </div>
+</footer>
+
+<!-- ── UPLOAD MODAL ── -->
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;opacity:0.7;margin-bottom:4px;font-family:'Manrope',sans-serif;">파일 연결</div>
+          <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:18px;">툴 HTML 파일 업로드</div>
+        </div>
+        <button onclick="closeUploadModal()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:#434655;line-height:1.7;margin:0 0 20px;">각 툴의 HTML 파일을 선택하면 해당 카드에 연결됩니다. 연결된 파일은 브라우저 로컬에 임시 저장되며, 실제 서비스는 서버에 파일을 업로드해야 합니다.</p>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <!-- 툴별 업로드 -->
+        <div id="upload-prompt" style="border:1.5px solid #e0e3e8;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#c3c6d7;" id="dot-prompt"></div>
+            <span style="font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;color:#191c1e;">프롬프트 빌더</span>
+          </div>
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;background:#f0f4ff;color:#004ac6;font-family:'Manrope',sans-serif;font-weight:700;font-size:11px;cursor:pointer;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            파일 선택
+            <input type="file" accept=".html,.htm" onchange="handleFileUpload(event,'prompt')"/>
+          </label>
+        </div>
+
+        <div id="upload-exam" style="border:1.5px solid #e0e3e8;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#c3c6d7;" id="dot-exam"></div>
+            <span style="font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;color:#191c1e;">직업상담사 2급 실기</span>
+          </div>
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;background:#f5f0ff;color:#712ae2;font-family:'Manrope',sans-serif;font-weight:700;font-size:11px;cursor:pointer;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            파일 선택
+            <input type="file" accept=".html,.htm" onchange="handleFileUpload(event,'exam')"/>
+          </label>
+        </div>
+
+        <div id="upload-excel" style="border:1.5px solid #e0e3e8;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#c3c6d7;" id="dot-excel"></div>
+            <span style="font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;color:#191c1e;">엑셀파일 런처</span>
+          </div>
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;background:#f0fdf4;color:#006242;font-family:'Manrope',sans-serif;font-weight:700;font-size:11px;cursor:pointer;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            파일 선택
+            <input type="file" accept=".html,.htm" onchange="handleFileUpload(event,'excel')"/>
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:12px 14px;background:#fffbeb;border-radius:9px;border:1px solid #fcd34d;">
+        <p style="font-size:11px;color:#78350f;line-height:1.6;margin:0;">
+          💡 <strong>실제 서비스용 안내:</strong> 서버(GitHub Pages, Vercel 등) 배포 시에는 <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;">/tools/</code> 폴더에 HTML 파일을 업로드하고 아래 경로 설정에서 URL을 직접 입력하세요.
+        </p>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div style="font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;color:#191c1e;margin-bottom:8px;">또는 URL 직접 입력 (서버 배포 후)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="urlInputs">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:11px;color:#434655;min-width:100px;font-family:'Manrope',sans-serif;">프롬프트 빌더</span>
+            <input type="text" id="url-prompt" placeholder="/tools/prompt-builder.html" style="flex:1;padding:8px 12px;border:1.5px solid #e0e3e8;border-radius:7px;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;" oninput="handleUrlInput(this,'prompt')"/>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:11px;color:#434655;min-width:100px;font-family:'Manrope',sans-serif;">직업상담사</span>
+            <input type="text" id="url-exam" placeholder="/tools/exam-prep.html" style="flex:1;padding:8px 12px;border:1.5px solid #e0e3e8;border-radius:7px;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;" oninput="handleUrlInput(this,'exam')"/>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:11px;color:#434655;min-width:100px;font-family:'Manrope',sans-serif;">엑셀 런처</span>
+            <input type="text" id="url-excel" placeholder="/tools/excel-launcher.html" style="flex:1;padding:8px 12px;border:1.5px solid #e0e3e8;border-radius:7px;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;" oninput="handleUrlInput(this,'excel')"/>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+        <button onclick="closeUploadModal()" style="padding:10px 20px;border-radius:8px;border:1.5px solid #e0e3e8;background:#fff;color:#434655;font-family:'Manrope',sans-serif;font-weight:600;font-size:13px;cursor:pointer;">닫기</button>
+        <button onclick="saveUrls()" style="padding:10px 20px;border-radius:8px;border:none;background:#004ac6;color:#fff;font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOOL VIEWER ── -->
+<div class="tool-viewer-overlay" id="toolViewer">
+  <div class="tool-viewer-bar">
+    <button onclick="closeTool()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 14px;border-radius:7px;font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Labs로 돌아가기
+    </button>
+    <span id="viewerTitle" style="font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;color:#fff;opacity:0.8;"></span>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <a id="viewerOpenNew" href="#" target="_blank" style="background:rgba(255,255,255,0.1);color:#fff;padding:6px 14px;border-radius:7px;font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+        새 탭에서 열기
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+      </a>
+    </div>
+  </div>
+  <iframe id="toolFrame" class="tool-viewer-frame" src="" title="툴 뷰어"></iframe>
+</div>
+
+<script>
+// ── STATE ──
+const toolUrls = JSON.parse(localStorage.getItem('rfl_tool_urls') || '{}');
+const toolBlobs = JSON.parse(localStorage.getItem('rfl_tool_blobs') || '{}');
+
+// 저장된 URL 로드
+function initUrls() {
+  ['prompt','exam','excel'].forEach(id => {
+    const saved = toolUrls[id];
+    const urlInput = document.getElementById('url-'+id);
+    if (saved && urlInput) urlInput.value = saved;
+    updateStatus(id, saved ? 'connected' : 'none');
+  });
+}
+
+function updateStatus(id, state) {
+  const el = document.getElementById(id+'-status');
+  const dot = document.getElementById('dot-'+id);
+  const row = document.getElementById('upload-'+id);
+  if (!el) return;
+  if (state === 'connected') {
+    el.textContent = '연결됨';
+    el.style.color = '#006242';
+    if (dot) { dot.style.background = '#006242'; }
+    if (row) { row.style.borderColor = '#bbf7d0'; row.style.background = '#f0fdf4'; }
+  } else {
+    el.textContent = '파일 미연결';
+    el.style.color = '#aaa';
+    if (dot) { dot.style.background = '#c3c6d7'; }
+    if (row) { row.style.borderColor = '#e0e3e8'; row.style.background = '#fff'; }
+  }
+}
+
+// ── FILTER ──
+document.querySelectorAll('.filter-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cat = btn.dataset.cat;
+    document.querySelectorAll('#toolGrid [data-cat]').forEach(card => {
+      card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+    });
+  });
+});
+
+// ── UPLOAD MODAL ──
+function openUploadModal() {
+  document.getElementById('uploadModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // 저장된 URL 불러오기
+  ['prompt','exam','excel'].forEach(id => {
+    const el = document.getElementById('url-'+id);
+    if (el && toolUrls[id]) el.value = toolUrls[id];
+  });
+}
+function closeUploadModal() {
+  document.getElementById('uploadModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('uploadModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('uploadModal')) closeUploadModal();
+});
+
+function handleFileUpload(event, id) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const blob = new Blob([e.target.result], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    toolUrls[id] = url;
+    localStorage.setItem('rfl_tool_urls', JSON.stringify(toolUrls));
+    updateStatus(id, 'connected');
+    showToast(`${file.name} 연결됨`);
+  };
+  reader.readAsText(file);
+}
+
+function handleUrlInput(input, id) {
+  const val = input.value.trim();
+  if (val) {
+    toolUrls[id] = val;
+    updateStatus(id, 'connected');
+  } else {
+    delete toolUrls[id];
+    updateStatus(id, 'none');
+  }
+}
+
+function saveUrls() {
+  ['prompt','exam','excel'].forEach(id => {
+    const el = document.getElementById('url-'+id);
+    if (el && el.value.trim()) toolUrls[id] = el.value.trim();
+  });
+  localStorage.setItem('rfl_tool_urls', JSON.stringify(toolUrls));
+  closeUploadModal();
+  showToast('저장됨');
+}
+
+// ── TOOL LAUNCH ──
+function launchTool(id, name) {
+  const url = toolUrls[id];
+  if (!url) {
+    openUploadModal();
+    showToast('먼저 파일을 연결해주세요');
+    return;
+  }
+  document.getElementById('viewerTitle').textContent = name;
+  document.getElementById('viewerOpenNew').href = url;
+  document.getElementById('toolFrame').src = url;
+  document.getElementById('toolViewer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeTool() {
+  document.getElementById('toolViewer').classList.remove('open');
+  document.getElementById('toolFrame').src = '';
+  document.body.style.overflow = '';
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  let t = document.getElementById('rfl-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'rfl-toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:#191c1e;color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;font-family:Manrope,sans-serif;font-weight:600;z-index:999;opacity:0;transition:all 0.25s;white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._to);
+  t._to = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)'; }, 2200);
+}
+
+initUrls();
+</script>
+</body>
+</html>

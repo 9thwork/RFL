@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RFL Studio | AI시대의 1인으로 살아남기</title>
+<meta name="description" content="상담심리·경영학 전공의 e커머스 전문가. AI를 활용한 실용 도구와 인사이트로 혼자서 다시 하는 삶을 설계합니다."/>
+<meta name="keywords" content="AI 툴, e커머스 자동화, 1인 창업, 직업상담, 프롬프트 빌더, RFL Studio"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#f7f9fb",
+        "surface-low": "#f2f4f6",
+        "surface-card": "#ffffff",
+        "surface-high": "#e6e8ea",
+        "on-surface": "#191c1e",
+        "on-muted": "#434655",
+        "primary": "#004ac6",
+        "primary-dark": "#003ea8",
+        "secondary": "#712ae2",
+        "tertiary": "#006242",
+        "outline": "#c3c6d7",
+      },
+      fontFamily: {
+        "display": ["Manrope", "sans-serif"],
+        "body": ["Noto Sans KR", "sans-serif"],
+      },
+    }
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: #f7f9fb; color: #191c1e; }
+
+  /* NAV */
+  .glass-nav {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(247,249,251,0.75);
+    border-bottom: 1px solid rgba(195,198,215,0.3);
+  }
+
+  /* HERO */
+  .hero-bg {
+    background: linear-gradient(135deg, #f7f9fb 0%, #eef2ff 50%, #f0fdf4 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg::before {
+    content: '';
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 520px; height: 520px;
+    background: radial-gradient(circle, rgba(113,42,226,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,74,198,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* GRADIENT TEXT */
+  .gradient-text {
+    background: linear-gradient(135deg, #004ac6 0%, #712ae2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .badge-blue { background: rgba(0,74,198,0.08); color: #004ac6; border: 1px solid rgba(0,74,198,0.15); }
+  .badge-green { background: rgba(0,98,66,0.08); color: #006242; border: 1px solid rgba(0,98,66,0.15); }
+  .badge-purple { background: rgba(113,42,226,0.08); color: #712ae2; border: 1px solid rgba(113,42,226,0.15); }
+  .badge-amber { background: rgba(180,120,0,0.08); color: #8a5e00; border: 1px solid rgba(180,120,0,0.15); }
+
+  /* CARDS */
+  .tool-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 12px rgba(25,28,30,0.04);
+  }
+  .tool-card:hover {
+    border-color: rgba(0,74,198,0.15);
+    box-shadow: 0 8px 32px rgba(25,28,30,0.08);
+  }
+  .tool-card:hover .tool-icon { color: #006242; }
+
+  .news-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(25,28,30,0.04);
+  }
+  .news-card:hover {
+    border-color: rgba(113,42,226,0.15);
+    box-shadow: 0 6px 24px rgba(25,28,30,0.08);
+  }
+
+  /* STAT CARD */
+  .stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    border-left: 3px solid;
+    box-shadow: 0 2px 8px rgba(25,28,30,0.04);
+  }
+
+  /* CTA BANNER */
+  .cta-banner {
+    background: linear-gradient(135deg, #004ac6 0%, #712ae2 100%);
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-banner::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .cta-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 40%;
+    width: 240px; height: 240px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+
+  /* BUTTONS */
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #004ac6; color: #fff;
+    padding: 12px 28px; border-radius: 10px;
+    font-weight: 700; font-size: 14px; font-family: 'Manrope', sans-serif;
+    transition: opacity 0.15s, transform 0.15s;
+    text-decoration: none;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: #004ac6;
+    padding: 11px 28px; border-radius: 10px;
+    font-weight: 600; font-size: 14px; font-family: 'Manrope', sans-serif;
+    border: 1.5px solid rgba(0,74,198,0.3);
+    transition: background 0.15s, border-color 0.15s;
+    text-decoration: none;
+  }
+  .btn-ghost:hover { background: rgba(0,74,198,0.06); border-color: rgba(0,74,198,0.5); }
+
+  /* ANIMATE */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.6s ease both; }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+  .delay-5 { animation-delay: 0.5s; }
+
+  /* FLOATING CARD */
+  .float-card {
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
+    border: 1px solid rgba(195,198,215,0.4);
+    box-shadow: 0 8px 32px rgba(25,28,30,0.1);
+    padding: 14px 18px;
+  }
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+  .float-anim { animation: floatY 4s ease-in-out infinite; }
+  .float-anim-slow { animation: floatY 5.5s ease-in-out infinite; animation-delay: 1s; }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #434655;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; max-width: 48px;
+    height: 1px; background: #c3c6d7;
+  }
+
+  /* INPUT */
+  .email-input {
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    padding: 11px 16px;
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  .email-input::placeholder { color: rgba(255,255,255,0.5); }
+  .email-input:focus { border-color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="glass-nav fixed top-0 w-full z-50">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="font-display font-black text-xl tracking-tighter text-on-surface">
+      RFL<span class="gradient-text">.</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="index.html" class="font-display text-sm font-600 text-primary border-b-2 border-primary pb-0.5">홈</a>
+      <a href="about.html" class="font-display text-sm font-500 text-on-muted hover:text-primary transition-colors">어바웃</a>
+      <a href="labs.html" class="font-display text-sm font-500 text-on-muted hover:text-primary transition-colors">Labs</a>
+      <a href="news.html" class="font-display text-sm font-500 text-on-muted hover:text-primary transition-colors">뉴스</a>
+      <a href="https://blog.naver.com" target="_blank" class="font-display text-sm font-500 text-on-muted hover:text-primary transition-colors">블로그</a>
+    </div>
+    <a href="about.html#contact" class="btn-primary text-xs px-5 py-2.5">문의하기</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero-bg pt-28 pb-20 md:pt-36 md:pb-28">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+
+      <!-- LEFT -->
+      <div>
+        <div class="badge badge-blue mb-6 fade-up">AI시대에 적응과 새로운 재창조</div>
+        <h1 class="font-display font-extrabold text-5xl md:text-6xl leading-[1.05] tracking-tight text-on-surface mb-6 fade-up delay-1">
+          AI시대의<br/>
+          <span class="gradient-text">1인으로</span><br/>
+          살아남기
+        </h1>
+        <p class="text-on-muted text-lg leading-relaxed mb-8 max-w-md fade-up delay-2">
+          상담심리·경영학 전공의 e커머스 전문가.<br/>
+          AI를 활용한 실용 도구와 인사이트로<br/>
+          <strong class="text-on-surface font-medium">혼자서 다시 하는 삶</strong>을 설계합니다.
+        </p>
+        <div class="flex flex-wrap gap-3 fade-up delay-3">
+          <a href="labs.html" class="btn-primary">
+            Labs 둘러보기
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="about.html" class="btn-ghost">소개 보기</a>
+        </div>
+
+        <!-- STATS ROW -->
+        <div class="flex gap-6 mt-10 fade-up delay-4">
+          <div>
+            <div class="font-display font-black text-2xl text-on-surface">20<span class="text-primary">+</span></div>
+            <div class="text-xs text-on-muted mt-0.5">년 e커머스 경력</div>
+          </div>
+          <div class="w-px bg-outline/40"></div>
+          <div>
+            <div class="font-display font-black text-2xl text-on-surface">4<span class="text-secondary">+</span></div>
+            <div class="text-xs text-on-muted mt-0.5">AI 실용 툴</div>
+          </div>
+          <div class="w-px bg-outline/40"></div>
+          <div>
+            <div class="font-display font-black text-2xl text-on-surface">AI<span class="text-tertiary">·</span>독립</div>
+            <div class="text-xs text-on-muted mt-0.5">준비 진행 중</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT — FLOATING CARDS -->
+      <div class="relative h-80 md:h-96 hidden md:block">
+        <!-- MAIN VISUAL CARD -->
+        <div class="absolute top-0 right-0 w-72 float-anim">
+          <div class="float-card">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#004ac6" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              </div>
+              <span class="font-display font-bold text-sm text-on-surface">프롬프트 빌더</span>
+              <span class="badge badge-green ml-auto" style="font-size:9px;padding:2px 8px;">완성</span>
+            </div>
+            <p class="text-xs text-on-muted leading-relaxed">목적에 맞는 AI 프롬프트를 구조적으로 설계하는 도구</p>
+            <div class="mt-3 flex items-center gap-2">
+              <div class="h-1.5 flex-1 bg-surface-low rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full" style="width:100%"></div>
+              </div>
+              <span class="text-xs text-primary font-600">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECOND CARD -->
+        <div class="absolute bottom-8 left-0 w-64 float-anim-slow">
+          <div class="float-card">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#712ae2" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </div>
+              <span class="font-display font-bold text-sm text-on-surface">직업상담사 2급</span>
+            </div>
+            <p class="text-xs text-on-muted">실기 시험 대비 학습 도구</p>
+          </div>
+        </div>
+
+        <!-- PULSE DOT -->
+        <div class="absolute top-1/2 right-1/3 fade-up delay-5">
+          <div class="relative">
+            <div class="w-3 h-3 bg-tertiary rounded-full"></div>
+            <div class="absolute inset-0 bg-tertiary/30 rounded-full animate-ping"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── LABS PREVIEW ── -->
+<section class="py-20 bg-surface-low">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+      <div>
+        <div class="section-label mb-3">AI 실용 툴</div>
+        <h2 class="font-display font-extrabold text-3xl md:text-4xl tracking-tight text-on-surface">
+          직접 만든 <span class="gradient-text">Labs</span>
+        </h2>
+        <p class="text-on-muted text-sm mt-2">e커머스와 일상에서 실제로 쓰는 AI 도구 모음</p>
+      </div>
+      <a href="labs.html" class="btn-ghost self-start md:self-auto">
+        전체 보기
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <!-- TOOL 1 -->
+      <a href="labs.html#prompt-builder" class="tool-card group block">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center tool-icon text-primary transition-colors">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          </div>
+          <span class="badge badge-green">완성</span>
+        </div>
+        <h3 class="font-display font-bold text-lg text-on-surface mb-2">프롬프트 빌더</h3>
+        <p class="text-on-muted text-sm leading-relaxed mb-4">AI에게 목적에 맞는 프롬프트를 구조적으로 설계. 역할·맥락·출력형식을 단계별로 조립합니다.</p>
+        <div class="flex items-center gap-2 text-primary text-xs font-600 font-display">
+          <span>바로 사용</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+
+      <!-- TOOL 2 -->
+      <a href="labs.html#exam-prep" class="tool-card group block">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-secondary/8 flex items-center justify-center tool-icon text-secondary transition-colors">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <span class="badge badge-green">완성</span>
+        </div>
+        <h3 class="font-display font-bold text-lg text-on-surface mb-2">직업상담사 2급 실기</h3>
+        <p class="text-on-muted text-sm leading-relaxed mb-4">직업상담사 2급 실기 시험 대비 학습 도구. 핵심 이론과 기출 패턴을 체계적으로 정리합니다.</p>
+        <div class="flex items-center gap-2 text-primary text-xs font-600 font-display">
+          <span>바로 사용</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+
+      <!-- TOOL 3 -->
+      <a href="labs.html#excel-launcher" class="tool-card group block">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-tertiary/8 flex items-center justify-center tool-icon text-tertiary transition-colors">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <span class="badge badge-green">완성</span>
+        </div>
+        <h3 class="font-display font-bold text-lg text-on-surface mb-2">엑셀파일 런처</h3>
+        <p class="text-on-muted text-sm leading-relaxed mb-4">반복적인 엑셀 작업을 자동화. 데이터 정리·변환·분석을 빠르게 처리하는 실무 도구입니다.</p>
+        <div class="flex items-center gap-2 text-primary text-xs font-600 font-display">
+          <span>바로 사용</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+
+      <!-- TOOL 4 — COMING SOON -->
+      <div class="tool-card opacity-70">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-surface-high flex items-center justify-center text-on-muted">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          </div>
+          <span class="badge badge-amber">개발 예정</span>
+        </div>
+        <h3 class="font-display font-bold text-lg text-on-surface mb-2">미니 e커머스 관리</h3>
+        <p class="text-on-muted text-sm leading-relaxed mb-4">스마트스토어 운영을 위한 경량 관리 도구. 주문·재고·매출을 한 화면에서 관리합니다.</p>
+        <div class="flex items-center gap-2 text-on-muted text-xs font-600 font-display">
+          <span>준비 중</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── NEWS PREVIEW ── -->
+<section class="py-20 bg-surface">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+      <div>
+        <div class="section-label mb-3">AI · 취업 · 자기계발</div>
+        <h2 class="font-display font-extrabold text-3xl md:text-4xl tracking-tight text-on-surface">
+          최신 <span class="gradient-text">뉴스레터</span>
+        </h2>
+        <p class="text-on-muted text-sm mt-2">실생활에 바로 접목하는 인사이트를 가공해서 전달합니다</p>
+      </div>
+      <a href="news.html" class="btn-ghost self-start md:self-auto">
+        전체 뉴스
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <!-- FEATURED + GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+      <!-- FEATURED -->
+      <div class="md:col-span-2 news-card">
+        <div class="bg-surface-high h-52 flex items-center justify-center relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10"></div>
+          <div class="relative text-center px-8">
+            <div class="font-display font-black text-5xl text-primary/10 absolute -top-2 -left-2 select-none">AI</div>
+            <div class="badge badge-blue mb-3">AI · 자동화</div>
+            <p class="font-display font-bold text-on-surface text-xl leading-tight">2025 AI 도구 트렌드<br/>실무 적용 가이드</p>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="badge badge-blue" style="font-size:9px;padding:2px 8px;">추천</span>
+            <span class="text-xs text-on-muted">2025년 3월</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-on-surface mb-2">AI가 바꾸는 1인 업무의 미래 — 지금 준비해야 할 것들</h3>
+          <p class="text-on-muted text-sm leading-relaxed mb-4">생성형 AI 도구가 1인 사업자와 직장인의 업무 방식을 어떻게 재편하고 있는지, 실제 활용 사례와 함께 분석합니다.</p>
+          <a href="news.html" class="flex items-center gap-2 text-primary text-xs font-600 font-display hover:gap-3 transition-all">
+            읽기
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- SIDE NEWS -->
+      <div class="flex flex-col gap-5">
+        <div class="news-card flex-1">
+          <div class="p-5">
+            <div class="badge badge-purple mb-3" style="font-size:9px;padding:2px 8px;">취업</div>
+            <h3 class="font-display font-bold text-sm text-on-surface mb-2 leading-tight">2025 직업상담사 시험 변경사항 총정리</h3>
+            <p class="text-on-muted text-xs leading-relaxed mb-3">실기 출제 기준 개편 내용과 합격 전략을 정리합니다.</p>
+            <a href="news.html" class="text-primary text-xs font-600 font-display">읽기 →</a>
+          </div>
+        </div>
+        <div class="news-card flex-1">
+          <div class="p-5">
+            <div class="badge badge-amber mb-3" style="font-size:9px;padding:2px 8px;">자기계발</div>
+            <h3 class="font-display font-bold text-sm text-on-surface mb-2 leading-tight">50대 전환기, AI로 새로운 커리어 설계하기</h3>
+            <p class="text-on-muted text-xs leading-relaxed mb-3">인생 2막을 준비하는 실질적인 로드맵을 공유합니다.</p>
+            <a href="news.html" class="text-primary text-xs font-600 font-display">읽기 →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT TEASER ── -->
+<section class="py-16 bg-surface-low">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="stat-card border-primary">
+        <div class="font-display font-black text-3xl text-on-surface mb-1">효율성</div>
+        <div class="text-xs text-on-muted font-600 uppercase tracking-wider mb-2">핵심 가치 01</div>
+        <p class="text-sm text-on-muted">최소한의 자원으로 최대의 결과를. AI를 도구로 활용해 1인의 한계를 넘습니다.</p>
+      </div>
+      <div class="stat-card border-secondary">
+        <div class="font-display font-black text-3xl text-on-surface mb-1">합리성</div>
+        <div class="text-xs text-on-muted font-600 uppercase tracking-wider mb-2">핵심 가치 02</div>
+        <p class="text-sm text-on-muted">데이터와 경험 기반의 판단. 감정이 아닌 근거로 결정합니다.</p>
+      </div>
+      <div class="stat-card border-tertiary">
+        <div class="font-display font-black text-3xl text-on-surface mb-1">개인화</div>
+        <div class="text-xs text-on-muted font-600 uppercase tracking-wider mb-2">핵심 가치 03</div>
+        <p class="text-sm text-on-muted">모두에게 맞는 답은 없습니다. 나에게 맞는 방식을 설계합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA BANNER ── -->
+<section class="py-16 bg-surface">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="cta-banner p-10 md:p-14 relative">
+      <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+        <div>
+          <div class="badge mb-4" style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.2);">뉴스레터</div>
+          <h2 class="font-display font-extrabold text-3xl md:text-4xl text-white leading-tight mb-3">
+            새로운 뉴스를<br/>확인해 보세요.
+          </h2>
+          <p class="text-white/70 text-sm leading-relaxed">
+            AI·취업·자기계발 분야의 핵심 뉴스를 가공해서<br/>
+            실생활에 바로 쓸 수 있는 인사이트로 전달합니다.
+          </p>
+        </div>
+        <div>
+          <div class="flex flex-col gap-3 max-w-sm">
+            <input type="email" class="email-input" placeholder="이메일 주소를 입력하세요"/>
+            <button class="w-full py-3 rounded-lg bg-white text-primary font-display font-bold text-sm hover:bg-white/90 transition-colors">
+              확인하기
+            </button>
+            <p class="text-white/40 text-xs text-center">언제든 구독 취소 가능합니다</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="bg-on-surface py-12">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+      <div class="md:col-span-2">
+        <div class="font-display font-black text-xl text-white mb-2">RFL<span class="text-primary" style="color:#b4c5ff">.</span></div>
+        <p class="text-white/40 text-xs uppercase tracking-widest mb-4">삶! 다시 재창조를 하다</p>
+        <p class="text-white/50 text-sm leading-relaxed max-w-xs">
+          AI시대에 혼자서 다시 하는 삶.<br/>
+          e커머스 20년 경험과 AI를 결합해<br/>
+          실용적인 도구와 인사이트를 만듭니다.
+        </p>
+      </div>
+      <div>
+        <div class="text-white/30 text-xs uppercase tracking-widest mb-4">탐색</div>
+        <div class="flex flex-col gap-2">
+          <a href="index.html" class="text-white/60 text-sm hover:text-white transition-colors">홈</a>
+          <a href="about.html" class="text-white/60 text-sm hover:text-white transition-colors">어바웃</a>
+          <a href="labs.html" class="text-white/60 text-sm hover:text-white transition-colors">Labs</a>
+          <a href="news.html" class="text-white/60 text-sm hover:text-white transition-colors">뉴스</a>
+        </div>
+      </div>
+      <div>
+        <div class="text-white/30 text-xs uppercase tracking-widest mb-4">연결</div>
+        <div class="flex flex-col gap-2">
+          <a href="https://blog.naver.com" target="_blank" class="text-white/60 text-sm hover:text-white transition-colors">네이버 블로그</a>
+          <a href="https://tistory.com" target="_blank" class="text-white/60 text-sm hover:text-white transition-colors">티스토리</a>
+          <a href="https://smartstore.naver.com" target="_blank" class="text-white/60 text-sm hover:text-white transition-colors">스마트스토어</a>
+          <a href="about.html#contact" class="text-white/60 text-sm hover:text-white transition-colors">문의하기</a>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-3">
+      <p class="text-white/30 text-xs">© 2025 RFL Studio. AI시대에 혼자서 다시 하는 삶.</p>
+      <div class="flex gap-4">
+        <a href="#" class="text-white/30 text-xs hover:text-white/60 transition-colors">개인정보처리방침</a>
+        <a href="#" class="text-white/30 text-xs hover:text-white/60 transition-colors">이용약관</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

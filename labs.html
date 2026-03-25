@@ -586,8 +586,16 @@ footer { background: #191c1e; }
 
 <script>
 // ── STATE ──
-const toolUrls = JSON.parse(localStorage.getItem('rfl_tool_urls') || '{}');
-const toolBlobs = JSON.parse(localStorage.getItem('rfl_tool_blobs') || '{}');
+// 기본 URL 고정 (PC/모바일 모든 기기에서 바로 작동)
+const DEFAULT_TOOL_URLS = {
+  prompt: '/prompt_builder_v2.html',
+  exam:   '/study_1.html',
+  excel:  ''
+};
+const toolUrls = Object.assign(
+  {...DEFAULT_TOOL_URLS},
+  JSON.parse(localStorage.getItem('rfl_tool_urls') || '{}')
+);
 
 // 저장된 URL 로드
 function initUrls() {

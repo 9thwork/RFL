@@ -592,7 +592,7 @@ async function analyze() {
 - 판매가: ${price}원${cost ? `\n- 원가: ${cost}원 (마진율 약 ${margin}%)` : ''}${compPrice ? `\n- 경쟁 최저가: ${compPrice}원` : ''}
 - 주요 키워드: ${keywords}${platform ? `\n- 판매 플랫폼: ${platform}` : ''}${season ? `\n- 계절성: ${season}` : ''}${diff ? `\n- 차별화 포인트: ${diff}` : ''}
 
-${detailBase64 ? '썸네일과 상세페이지 이미지를 모두 첨부했습니다.' : '썸네일 이미지를 첨부했습니다.'}
+${detailBase64Array && detailBase64Array.filter(Boolean).length > 0 ? `썸네일과 상세페이지 이미지 ${detailBase64Array.filter(Boolean).length}장을 첨부했습니다.` : '썸네일 이미지를 첨부했습니다.'}
 
 아래 JSON 형식으로 분석 결과를 출력하세요:
 {

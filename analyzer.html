@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RFL 상품 분석기 | 판매 가능성 예측</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans KR',sans-serif;background:#f7f9fb;color:#191c1e;margin:0;line-height:1.7;}
+
+:root{
+  --primary:#004ac6;--secondary:#712ae2;--success:#006242;
+  --amber:#8a6000;--danger:#b00020;
+  --surface:#f7f9fb;--surface-low:#f2f4f6;--card:#fff;
+  --dark:#0f1729;--on-surface:#191c1e;--on-muted:#434655;--outline:#c3c6d7;
+}
+
+/* NAV */
+.glass-nav{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(247,249,251,0.88);border-bottom:1px solid rgba(195,198,215,0.3);position:sticky;top:0;z-index:50;}
+.nav-inner{max-width:1000px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:'Manrope',sans-serif;font-weight:900;font-size:18px;letter-spacing:-0.03em;text-decoration:none;color:var(--on-surface);}
+.nav-logo span{background:linear-gradient(135deg,#004ac6,#712ae2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-links{display:flex;gap:20px;align-items:center;}
+.nav-link{font-family:'Manrope',sans-serif;font-size:12px;font-weight:500;color:var(--on-muted);text-decoration:none;transition:color 0.15s;}
+.nav-link:hover,.nav-link.active{color:var(--primary);}
+.nav-link.active{font-weight:700;border-bottom:2px solid var(--primary);padding-bottom:1px;}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#0f1729,#1a0a35);padding:56px 0 48px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;right:-60px;width:500px;height:500px;background:radial-gradient(circle,rgba(0,74,198,0.2) 0%,transparent 65%);pointer-events:none;}
+.hero::after{content:'';position:absolute;bottom:-60px;left:30%;width:360px;height:360px;background:radial-gradient(circle,rgba(113,42,226,0.15) 0%,transparent 65%);pointer-events:none;}
+.hero-inner{max-width:1000px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+.hero-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;font-family:'Manrope',sans-serif;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);margin-bottom:16px;}
+.hero h1{font-family:'Manrope',sans-serif;font-weight:900;font-size:clamp(1.8rem,4vw,2.8rem);color:#fff;margin:0 0 10px;letter-spacing:-0.03em;line-height:1.1;}
+.hero p{font-size:14px;color:rgba(255,255,255,0.5);margin:0;max-width:480px;}
+.gradient-text{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* MAIN WRAP */
+.main{max-width:1000px;margin:0 auto;padding:36px 24px 80px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+@media(max-width:720px){.two-col{grid-template-columns:1fr;}}
+
+/* CARDS */
+.card{background:var(--card);border-radius:18px;padding:28px;border:1px solid var(--outline);box-shadow:0 2px 12px rgba(25,28,30,0.05);}
+.card-title{font-family:'Manrope',sans-serif;font-weight:800;font-size:15px;color:var(--on-surface);margin:0 0 20px;display:flex;align-items:center;gap:8px;}
+.card-title .num{width:22px;height:22px;border-radius:6px;background:var(--primary);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card-title .num.opt{background:var(--secondary);}
+
+/* FORM */
+.field-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.field-label{font-size:11px;font-weight:700;font-family:'Manrope',sans-serif;color:var(--on-muted);letter-spacing:0.05em;display:flex;align-items:center;gap:6px;}
+.req{color:var(--danger);font-size:10px;}
+.opt-tag{font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(113,42,226,0.08);color:var(--secondary);font-family:'Manrope',sans-serif;font-weight:700;}
+.field{background:#f7f9fb;border:1.5px solid var(--outline);border-radius:9px;padding:10px 14px;font-size:13px;font-family:'Noto Sans KR',sans-serif;color:var(--on-surface);outline:none;transition:border-color 0.15s,box-shadow 0.15s;width:100%;}
+.field:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(0,74,198,0.07);}
+.field::placeholder{color:#bbb;}
+select.field{cursor:pointer;}
+textarea.field{resize:vertical;min-height:72px;line-height:1.6;}
+
+/* IMAGE UPLOAD */
+.img-upload{border:2px dashed var(--outline);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all 0.15s;background:#fafbfc;position:relative;}
+.img-upload:hover{border-color:var(--primary);background:rgba(0,74,198,0.02);}
+.img-upload.has-img{border-style:solid;border-color:rgba(0,98,66,0.3);background:rgba(0,98,66,0.02);}
+.img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-preview{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-top:8px;display:none;}
+.img-upload.has-img .img-preview{display:block;}
+.upload-icon{color:#bbb;margin-bottom:6px;}
+.upload-text{font-size:12px;color:#aaa;font-family:'Manrope',sans-serif;}
+.img-upload.has-img .upload-icon,.img-upload.has-img .upload-text{display:none;}
+
+/* API KEY */
+.api-section{background:linear-gradient(135deg,rgba(0,74,198,0.04),rgba(113,42,226,0.04));border:1px solid rgba(0,74,198,0.12);border-radius:14px;padding:18px 20px;margin-bottom:20px;}
+.api-row{display:flex;gap:8px;align-items:center;}
+.api-input{flex:1;background:#fff;border:1.5px solid var(--outline);border-radius:9px;padding:9px 14px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--on-surface);outline:none;transition:border-color 0.15s;}
+.api-input:focus{border-color:var(--primary);}
+.api-save-btn{padding:9px 14px;border-radius:8px;border:1.5px solid var(--outline);background:#fff;font-family:'Manrope',sans-serif;font-weight:700;font-size:11px;cursor:pointer;color:var(--on-muted);white-space:nowrap;transition:all 0.15s;}
+.api-save-btn:hover{border-color:var(--primary);color:var(--primary);}
+.api-status{font-size:11px;font-family:'Manrope',sans-serif;margin-top:6px;}
+.api-status.ok{color:var(--success);}
+.api-status.no{color:#aaa;}
+
+/* LEVEL TABS */
+.level-tabs{display:flex;gap:6px;margin-bottom:20px;}
+.level-tab{flex:1;padding:8px;border-radius:9px;font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;border:1.5px solid var(--outline);background:#fff;color:#888;cursor:pointer;transition:all 0.15s;text-align:center;}
+.level-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.level-tab.lv2{border-color:rgba(113,42,226,0.3);color:var(--secondary);}
+.level-tab.lv2.active{background:var(--secondary);border-color:var(--secondary);color:#fff;}
+
+/* ANALYZE BTN */
+.analyze-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;border-radius:12px;font-family:'Manrope',sans-serif;font-weight:800;font-size:15px;cursor:pointer;transition:opacity 0.15s,transform 0.15s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.analyze-btn:hover{opacity:0.92;transform:translateY(-1px);}
+.analyze-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+/* LOADING */
+.loading-wrap{display:none;text-align:center;padding:48px 24px;}
+.loading-wrap.show{display:block;}
+.loading-spinner{width:40px;height:40px;border:3px solid rgba(0,74,198,0.15);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-family:'Manrope',sans-serif;font-weight:700;font-size:14px;color:var(--on-muted);}
+.loading-sub{font-size:12px;color:#aaa;margin-top:4px;}
+
+/* RESULT */
+.result-wrap{display:none;}
+.result-wrap.show{display:block;}
+
+/* SCORE CARD */
+.score-card{background:linear-gradient(135deg,#0f1729,#1a0a35);border-radius:20px;padding:32px;margin-bottom:20px;position:relative;overflow:hidden;}
+.score-card::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:rgba(0,74,198,0.15);border-radius:50%;}
+.score-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;position:relative;z-index:1;}
+.score-product-name{font-family:'Manrope',sans-serif;font-weight:800;font-size:18px;color:#fff;max-width:300px;line-height:1.3;}
+.verdict-badge{padding:6px 16px;border-radius:999px;font-family:'Manrope',sans-serif;font-weight:800;font-size:12px;letter-spacing:0.06em;flex-shrink:0;}
+.verdict-rec{background:rgba(0,98,66,0.3);color:#4ade80;border:1px solid rgba(74,222,128,0.3);}
+.verdict-cond{background:rgba(180,130,0,0.3);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);}
+.verdict-no{background:rgba(176,0,32,0.3);color:#f87171;border:1px solid rgba(248,113,113,0.3);}
+.score-main{display:flex;align-items:center;gap:32px;position:relative;z-index:1;flex-wrap:wrap;}
+.score-circle{position:relative;width:110px;height:110px;flex-shrink:0;}
+.score-circle svg{transform:rotate(-90deg);}
+.score-circle-bg{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:8;}
+.score-circle-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
+.score-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.score-num span{font-family:'Manrope',sans-serif;font-weight:900;font-size:30px;color:#fff;line-height:1;}
+.score-num small{display:block;font-size:11px;color:rgba(255,255,255,0.4);font-family:'Manrope',sans-serif;}
+.score-bars{flex:1;min-width:200px;}
+.score-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.score-bar-label{font-size:11px;font-family:'Manrope',sans-serif;font-weight:700;color:rgba(255,255,255,0.5);width:80px;flex-shrink:0;}
+.score-bar-track{flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:999px;transition:width 1s ease;}
+.score-bar-val{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);width:28px;text-align:right;flex-shrink:0;}
+
+/* ANALYSIS SECTIONS */
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:600px){.analysis-grid{grid-template-columns:1fr;}}
+.analysis-card{background:#fff;border-radius:14px;padding:20px;border:1px solid var(--outline);box-shadow:0 2px 8px rgba(25,28,30,0.04);}
+.analysis-card-title{font-family:'Manrope',sans-serif;font-weight:800;font-size:13px;color:var(--on-surface);margin:0 0 14px;display:flex;align-items:center;gap:7px;}
+.analysis-card-title svg{color:var(--primary);}
+.analysis-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:13px;color:var(--on-muted);line-height:1.6;}
+.analysis-item::before{content:'·';color:var(--primary);font-weight:900;flex-shrink:0;margin-top:1px;}
+
+/* REPORT CARD */
+.report-card{background:#fff;border-radius:14px;padding:24px;border:1px solid var(--outline);box-shadow:0 2px 8px rgba(25,28,30,0.04);margin-bottom:16px;}
+.report-section{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #f0f2f4;}
+.report-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.report-section-title{font-family:'Manrope',sans-serif;font-weight:800;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--primary);margin-bottom:8px;}
+.report-text{font-size:13px;color:var(--on-muted);line-height:1.8;white-space:pre-wrap;}
+
+/* IMPROVE CARD */
+.improve-item{background:rgba(0,74,198,0.04);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:8px;}
+.improve-item.warn{background:rgba(180,130,0,0.06);border-color:var(--amber);}
+.improve-item.danger{background:rgba(176,0,32,0.04);border-color:var(--danger);}
+.improve-title{font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;color:var(--on-surface);margin-bottom:3px;}
+.improve-desc{font-size:12px;color:var(--on-muted);line-height:1.6;}
+
+/* HISTORY */
+.history-wrap{margin-top:32px;}
+.history-title{font-family:'Manrope',sans-serif;font-weight:800;font-size:13px;color:var(--on-surface);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.history-list{display:flex;flex-direction:column;gap:8px;}
+.history-item{background:#fff;border-radius:10px;padding:12px 16px;border:1px solid var(--outline);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:border-color 0.15s;}
+.history-item:hover{border-color:rgba(0,74,198,0.2);}
+.history-name{font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;color:var(--on-surface);}
+.history-meta{font-size:11px;color:#aaa;margin-top:2px;}
+.history-score{font-family:'Manrope',sans-serif;font-weight:900;font-size:18px;}
+
+/* RESET BTN */
+.reset-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1.5px solid var(--outline);background:#fff;font-family:'Manrope',sans-serif;font-weight:600;font-size:12px;cursor:pointer;color:var(--on-muted);transition:all 0.15s;margin-top:12px;}
+.reset-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+/* TOAST */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--on-surface);color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;font-family:'Manrope',sans-serif;font-weight:600;z-index:999;opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+footer{background:var(--on-surface);padding:32px 0;}
+.footer-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="glass-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">RFL<span>.</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">홈</a>
+      <a href="labs.html" class="nav-link">Labs</a>
+      <a href="news.html" class="nav-link">뉴스</a>
+      <a href="planner.html" class="nav-link">플래너</a>
+      <a href="analyzer.html" class="nav-link active">분석기</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">RFL Analyzer · Phase 1</div>
+    <h1>상품 <span class="gradient-text">판매 가능성</span><br/>AI 예측 분석기</h1>
+    <p>이미지·기본 정보만으로 소싱 전 판매 적합성을 판단합니다.<br/>데이터 없는 신규 상품도 AI가 예측 분석합니다.</p>
+  </div>
+</section>
+
+<div class="main">
+
+  <!-- API KEY -->
+  <div class="api-section">
+    <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:12px;color:var(--primary);margin-bottom:8px;letter-spacing:0.05em;">ANTHROPIC API KEY</div>
+    <div class="api-row">
+      <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-api03-..."/>
+      <button class="api-save-btn" onclick="saveApiKey()">저장</button>
+      <button class="api-save-btn" onclick="clearApiKey()" style="color:var(--danger);border-color:rgba(176,0,32,0.2);">삭제</button>
+    </div>
+    <div class="api-status no" id="apiStatus">API 키를 입력하세요</div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,74,198,0.1);">
+      <div style="font-family:'Manrope',sans-serif;font-weight:700;font-size:11px;color:var(--primary);margin-bottom:6px;">CLOUDFLARE WORKER 프록시 URL</div>
+      <div class="api-row">
+        <input type="text" class="api-input" id="proxyUrlInput" placeholder="https://rfl-api-proxy.YOUR_ID.workers.dev" style="font-family:'IBM Plex Mono',monospace;font-size:11px;" value=""/>
+        <button class="api-save-btn" onclick="saveProxyAndReload()">저장</button>
+      </div>
+      <div style="font-size:10px;color:#aaa;margin-top:4px;" id="proxyStatus"></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+
+    <!-- LEFT: INPUT -->
+    <div>
+      <!-- LEVEL TABS -->
+      <div class="level-tabs">
+        <button class="level-tab active" onclick="setLevel(1,this)">Lv.1 기본 분석</button>
+        <button class="level-tab lv2" onclick="setLevel(2,this)">Lv.2 심화 분석</button>
+      </div>
+
+      <!-- BASIC INFO -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title"><span class="num">1</span> 기본 정보 <span style="font-size:10px;color:#aaa;font-weight:500;">(필수)</span></div>
+
+        <div class="field-group">
+          <div class="field-label">상품명 <span class="req">*</span></div>
+          <input type="text" class="field" id="productName" placeholder="예: 여성 여름 린넨 와이드 팬츠"/>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field-group">
+            <div class="field-label">카테고리 <span class="req">*</span></div>
+            <select class="field" id="category">
+              <option value="">선택</option>
+              <optgroup label="패션/의류">
+                <option>여성의류</option><option>남성의류</option><option>아동의류</option>
+                <option>언더웨어/잠옷</option><option>가방/지갑</option><option>신발</option><option>패션잡화</option>
+              </optgroup>
+              <optgroup label="뷰티/건강">
+                <option>스킨케어</option><option>메이크업</option><option>헤어케어</option>
+                <option>건강기능식품</option><option>의약외품</option>
+              </optgroup>
+              <optgroup label="생활/주방">
+                <option>주방용품</option><option>생활용품</option><option>청소용품</option>
+                <option>욕실용품</option><option>수납/정리</option>
+              </optgroup>
+              <optgroup label="식품">
+                <option>가공식품</option><option>신선식품</option><option>음료/차</option><option>건강식품</option>
+              </optgroup>
+              <optgroup label="디지털/가전">
+                <option>스마트기기</option><option>주변기기/액세서리</option><option>소형가전</option>
+              </optgroup>
+              <optgroup label="스포츠/레저">
+                <option>스포츠의류</option><option>스포츠용품</option><option>캠핑/아웃도어</option>
+              </optgroup>
+              <optgroup label="반려동물">
+                <option>반려동물 사료</option><option>반려동물 용품</option>
+              </optgroup>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <div class="field-label">판매가 <span class="req">*</span></div>
+            <input type="number" class="field" id="price" placeholder="예: 29900"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">주요 키워드 <span class="req">*</span> <span style="font-size:10px;color:#aaa;">쉼표로 구분, 2~3개</span></div>
+          <input type="text" class="field" id="keywords" placeholder="예: 린넨팬츠, 여름바지, 와이드팬츠"/>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">썸네일 이미지 <span class="req">*</span></div>
+          <div class="img-upload" id="thumbUpload">
+            <input type="file" accept="image/*" onchange="handleImg(event,'thumb')"/>
+            <div class="upload-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            </div>
+            <div class="upload-text">클릭하거나 이미지를 드래그하세요</div>
+            <img class="img-preview" id="thumbPreview"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">상세페이지 이미지 <span class="opt-tag">선택</span> <span style="font-size:10px;color:#aaa;">최대 5장 (분할 이미지 모두 업로드)</span></div>
+          <div class="img-upload" id="detailUpload" style="cursor:pointer;">
+            <input type="file" accept="image/*" multiple onchange="handleDetailImgs(event)"/>
+            <div class="upload-icon" id="detailIcon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            </div>
+            <div class="upload-text" id="detailText">분할 이미지 여러 장 선택 가능</div>
+            <div id="detailPreviews" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+          </div>
+          <div id="detailCount" style="font-size:11px;color:#006242;font-family:'Manrope',sans-serif;margin-top:4px;display:none;"></div>
+        </div>
+      </div>
+
+      <!-- LEVEL 2 -->
+      <div class="card lv2-section" id="lv2Section" style="margin-bottom:16px;display:none;">
+        <div class="card-title"><span class="num opt">2</span> 심화 정보 <span style="font-size:10px;color:#aaa;font-weight:500;">(선택 — 정확도 향상)</span></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field-group">
+            <div class="field-label">원가 <span class="opt-tag">선택</span></div>
+            <input type="number" class="field" id="cost" placeholder="예: 12000"/>
+          </div>
+          <div class="field-group">
+            <div class="field-label">경쟁 최저가 <span class="opt-tag">선택</span></div>
+            <input type="number" class="field" id="compPrice" placeholder="예: 19900"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">판매 플랫폼 <span class="opt-tag">선택</span></div>
+          <select class="field" id="platform">
+            <option value="">선택 안함</option>
+            <option>스마트스토어</option>
+            <option>쿠팡</option>
+            <option>스마트스토어 + 쿠팡</option>
+            <option>11번가</option>
+            <option>자사몰</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">계절성 <span class="opt-tag">선택</span></div>
+          <select class="field" id="season">
+            <option value="">선택 안함</option>
+            <option>봄/여름 시즌 상품</option>
+            <option>가을/겨울 시즌 상품</option>
+            <option>연중 판매 가능</option>
+            <option>특정 이벤트/시즌 (명절 등)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">차별화 포인트 <span class="opt-tag">선택</span></div>
+          <textarea class="field" id="diffPoint" placeholder="경쟁 상품 대비 이 상품만의 강점&#10;예: 천연소재 사용, 독점 수입, 자체 디자인 등"></textarea>
+        </div>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        AI 판매 가능성 분석 시작
+      </button>
+    </div>
+
+    <!-- RIGHT: RESULT -->
+    <div>
+      <!-- LOADING -->
+      <div class="loading-wrap" id="loadingWrap">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">AI가 상품을 분석 중입니다</div>
+        <div class="loading-sub">이미지와 상품 정보를 종합 판단하고 있어요</div>
+      </div>
+
+      <!-- RESULT -->
+      <div class="result-wrap" id="resultWrap">
+
+        <!-- SCORE -->
+        <div class="score-card" id="scoreCard">
+          <div class="score-header">
+            <div class="score-product-name" id="resultName">-</div>
+            <div class="verdict-badge" id="verdictBadge">-</div>
+          </div>
+          <div class="score-main">
+            <div class="score-circle">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle class="score-circle-bg" cx="55" cy="55" r="46"/>
+                <circle class="score-circle-fill" id="scoreCircle" cx="55" cy="55" r="46"
+                  stroke-dasharray="289" stroke-dashoffset="289"/>
+              </svg>
+              <div class="score-num">
+                <span id="scoreNum">0</span>
+                <small>/ 100</small>
+              </div>
+            </div>
+            <div class="score-bars" id="scoreBars"></div>
+          </div>
+        </div>
+
+        <!-- ANALYSIS GRID -->
+        <div class="analysis-grid" id="analysisGrid"></div>
+
+        <!-- FULL REPORT -->
+        <div class="report-card" id="reportCard"></div>
+
+        <!-- IMPROVEMENTS -->
+        <div class="card" id="improveCard" style="margin-bottom:16px;">
+          <div class="card-title">개선 제안</div>
+          <div id="improveList"></div>
+        </div>
+
+        <button class="reset-btn" onclick="resetAll()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          새 상품 분석하기
+        </button>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div id="emptyState" style="text-align:center;padding:60px 24px;">
+        <div style="width:64px;height:64px;border-radius:18px;background:rgba(0,74,198,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#004ac6" stroke-width="1.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:700;font-size:15px;color:var(--on-surface);margin-bottom:6px;">분석 결과가 여기에 표시됩니다</div>
+        <div style="font-size:13px;color:#aaa;">왼쪽 양식을 작성하고 분석을 시작하세요</div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="history-wrap" id="historyWrap" style="display:none;">
+        <div class="history-title">
+          <span>분석 이력</span>
+          <button onclick="clearHistory()" style="font-size:11px;color:#aaa;background:none;border:none;cursor:pointer;font-family:'Manrope',sans-serif;">전체 삭제</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:16px;color:#fff;margin-bottom:2px;">RFL<span style="background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">.</span></div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:0.1em;">상품 분석기 Phase 1</div>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.25);">© 2025 RFL Studio · 예측 분석 기반 — 실제 판매 보장 아님</div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+// ── 상태 ──
+// ✏️ Cloudflare Worker 배포 후 아래 URL을 교체하세요
+const PROXY_URL = localStorage.getItem('rfl_proxy_url') || 'https://rfl-api-proxy.YOUR_ID.workers.dev';
+
+let thumbBase64 = null;
+let detailBase64Array = []; // 다중 이미지 배열
+let history = JSON.parse(localStorage.getItem('rfl_analyzer_history') || '[]');
+let currentLevel = 1;
+
+function saveProxyAndReload() {
+  const url = document.getElementById('proxyUrlInput').value.trim();
+  if (!url || !url.startsWith('https://')) { toast('올바른 URL을 입력하세요 (https://...)'); return; }
+  localStorage.setItem('rfl_proxy_url', url);
+  document.getElementById('proxyStatus').textContent = '✓ 저장됨: ' + url;
+  document.getElementById('proxyStatus').style.color = '#006242';
+  toast('프록시 URL 저장됨');
+}
+
+// ── PROXY URL 설정 ──
+function saveProxyUrl() {
+  const url = document.getElementById('proxyUrlInput')?.value?.trim();
+  if (url) {
+    localStorage.setItem('rfl_proxy_url', url);
+    location.reload();
+  }
+}
+
+// ── API KEY ──
+function loadApiKey() {
+  const k = localStorage.getItem('rfl_api_key') || '';
+  if (k) {
+    document.getElementById('apiKeyInput').value = k;
+    document.getElementById('apiStatus').textContent = '✓ API 키 저장됨';
+    document.getElementById('apiStatus').className = 'api-status ok';
+  }
+}
+function saveApiKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (!k) { toast('API 키를 입력하세요'); return; }
+  if (!k.startsWith('sk-ant-')) { toast('올바른 Anthropic API 키 형식이 아닙니다'); return; }
+  localStorage.setItem('rfl_api_key', k);
+  document.getElementById('apiStatus').textContent = '✓ 저장 완료';
+  document.getElementById('apiStatus').className = 'api-status ok';
+  toast('API 키 저장됨');
+}
+function clearApiKey() {
+  localStorage.removeItem('rfl_api_key');
+  document.getElementById('apiKeyInput').value = '';
+  document.getElementById('apiStatus').textContent = 'API 키를 입력하세요';
+  document.getElementById('apiStatus').className = 'api-status no';
+  toast('API 키 삭제됨');
+}
+function getApiKey() {
+  return document.getElementById('apiKeyInput').value.trim() || localStorage.getItem('rfl_api_key') || '';
+}
+
+// ── LEVEL ──
+function setLevel(lv, btn) {
+  currentLevel = lv;
+  document.querySelectorAll('.level-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lv2Section').style.display = lv === 2 ? '' : 'none';
+}
+
+// ── 썸네일 이미지 ──
+function handleImg(e, type) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const b64 = ev.target.result.split(',')[1];
+    const preview = document.getElementById('thumbPreview');
+    const wrap = document.getElementById('thumbUpload');
+    preview.src = ev.target.result;
+    wrap.classList.add('has-img');
+    thumbBase64 = b64;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── 상세페이지 다중 이미지 ──
+function handleDetailImgs(e) {
+  const files = Array.from(e.target.files).slice(0, 5); // 최대 5장
+  if (!files.length) return;
+  detailBase64Array = [];
+  const previews = document.getElementById('detailPreviews');
+  const wrap = document.getElementById('detailUpload');
+  const icon = document.getElementById('detailIcon');
+  const text = document.getElementById('detailText');
+  const count = document.getElementById('detailCount');
+  previews.innerHTML = '';
+  icon.style.display = 'none';
+  text.style.display = 'none';
+  wrap.classList.add('has-img');
+  count.style.display = '';
+  count.textContent = `✓ ${files.length}장 선택됨`;
+
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      detailBase64Array[i] = ev.target.result.split(',')[1];
+      // 미리보기 썸네일
+      const img = document.createElement('img');
+      img.src = ev.target.result;
+      img.style.cssText = 'width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #e0e3e8;';
+      previews.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── ANALYZE ──
+async function analyze() {
+  const apiKey = getApiKey();
+  if (!apiKey) { toast('API 키를 먼저 입력하세요'); return; }
+  const name = document.getElementById('productName').value.trim();
+  const cat = document.getElementById('category').value;
+  const price = document.getElementById('price').value;
+  const keywords = document.getElementById('keywords').value.trim();
+  if (!name || !cat || !price || !keywords) { toast('필수 항목을 모두 입력하세요'); return; }
+  if (!thumbBase64) { toast('썸네일 이미지를 업로드하세요'); return; }
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultWrap').classList.remove('show');
+  document.getElementById('loadingWrap').classList.add('show');
+  document.getElementById('analyzeBtn').disabled = true;
+
+  // 심화 데이터
+  const cost = document.getElementById('cost').value;
+  const compPrice = document.getElementById('compPrice').value;
+  const platform = document.getElementById('platform').value;
+  const season = document.getElementById('season').value;
+  const diff = document.getElementById('diffPoint').value.trim();
+
+  const margin = cost && price ? Math.round((1 - cost/price)*100) : null;
+
+  // 프롬프트 구성
+  const systemPrompt = `당신은 한국 e커머스 시장 전문가입니다. 20년 이상의 스마트스토어·쿠팡 운영 경험을 바탕으로 상품 소싱 단계에서 판매 가능성을 예측합니다.
+핵심 원칙: 데이터가 없는 신규 상품도 이미지·상품명·카테고리·가격만으로 판매 적합성을 예측합니다.
+반드시 JSON 형식으로만 응답하세요. 다른 텍스트 없이 순수 JSON만 출력합니다.`;
+
+  const userPrompt = `다음 상품을 분석하고 판매 가능성을 예측해주세요.
+
+【상품 정보】
+- 상품명: ${name}
+- 카테고리: ${cat}
+- 판매가: ${price}원${cost ? `\n- 원가: ${cost}원 (마진율 약 ${margin}%)` : ''}${compPrice ? `\n- 경쟁 최저가: ${compPrice}원` : ''}
+- 주요 키워드: ${keywords}${platform ? `\n- 판매 플랫폼: ${platform}` : ''}${season ? `\n- 계절성: ${season}` : ''}${diff ? `\n- 차별화 포인트: ${diff}` : ''}
+
+${detailBase64 ? '썸네일과 상세페이지 이미지를 모두 첨부했습니다.' : '썸네일 이미지를 첨부했습니다.'}
+
+아래 JSON 형식으로 분석 결과를 출력하세요:
+{
+  "totalScore": 숫자(0-100),
+  "verdict": "추천" 또는 "조건부추천" 또는 "비추천",
+  "verdictReason": "판정 이유 한 줄",
+  "scores": {
+    "imageQuality": 숫자(0-100),
+    "priceCompetitiveness": 숫자(0-100),
+    "keywordOptimization": 숫자(0-100),
+    "marketPotential": 숫자(0-100)
+  },
+  "imageAnalysis": ["이미지 분석 포인트 1", "포인트 2", "포인트 3"],
+  "marketAnalysis": ["시장 분석 포인트 1", "포인트 2", "포인트 3"],
+  "risks": ["리스크 1", "리스크 2"],
+  "strengths": ["강점 1", "강점 2"],
+  "report": {
+    "summary": "종합 분석 요약 (3~4문장)",
+    "imageComment": "이미지 품질 및 경쟁력 상세 코멘트",
+    "priceComment": "가격 포지셔닝 분석",
+    "keywordComment": "키워드 최적화 분석",
+    "recommendation": "소싱 추천 전략 및 주의사항"
+  },
+  "improvements": [
+    {"type": "info", "title": "개선항목 제목", "desc": "상세 설명"},
+    {"type": "warn", "title": "주의항목 제목", "desc": "상세 설명"},
+    {"type": "danger", "title": "위험항목 제목", "desc": "상세 설명"}
+  ]
+}`;
+
+  // API 메시지 구성 — 썸네일 + 상세페이지 다중 이미지
+  const detailCount = detailBase64Array.filter(Boolean).length;
+  const userPromptFinal = userPrompt.replace(
+    '썸네일 이미지를 첨부했습니다.',
+    detailCount > 0
+      ? `썸네일 1장과 상세페이지 이미지 ${detailCount}장을 첨부했습니다. 상세페이지 이미지들을 순서대로 분석해 구성력과 신뢰도를 평가해주세요.`
+      : '썸네일 이미지를 첨부했습니다.'
+  );
+
+  const content = [{ type: 'text', text: userPromptFinal }];
+  // 썸네일
+  content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: thumbBase64 } });
+  // 상세페이지 (최대 5장)
+  detailBase64Array.filter(Boolean).forEach(b64 => {
+    content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } });
+  });
+
+  try {
+    const proxyUrl = localStorage.getItem('rfl_proxy_url') || PROXY_URL;
+    const res = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || `HTTP ${res.status} 오류`);
+    }
+
+    const data = await res.json();
+    const raw = data.content[0].text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(raw);
+    renderResult(result, name);
+
+    // 이력 저장
+    history.unshift({ name, cat, price, score: result.totalScore, verdict: result.verdict, ts: new Date().toLocaleString('ko') });
+    if (history.length > 10) history.pop();
+    localStorage.setItem('rfl_analyzer_history', JSON.stringify(history));
+    renderHistory();
+
+  } catch(e) {
+    toast('분석 오류: ' + e.message);
+    document.getElementById('emptyState').style.display = '';
+  } finally {
+    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+function renderResult(r, name) {
+  // 점수 원형
+  document.getElementById('resultName').textContent = name;
+  const vb = document.getElementById('verdictBadge');
+  vb.textContent = r.verdict === '추천' ? '✅ 소싱 추천' : r.verdict === '조건부추천' ? '⚠️ 조건부 추천' : '❌ 비추천';
+  vb.className = 'verdict-badge ' + (r.verdict === '추천' ? 'verdict-rec' : r.verdict === '조건부추천' ? 'verdict-cond' : 'verdict-no');
+
+  // 점수 애니메이션
+  const circle = document.getElementById('scoreCircle');
+  const circ = 2 * Math.PI * 46;
+  const pct = r.totalScore / 100;
+  const color = r.totalScore >= 70 ? '#4ade80' : r.totalScore >= 50 ? '#fbbf24' : '#f87171';
+  circle.style.stroke = color;
+  circle.style.strokeDasharray = circ;
+  setTimeout(() => { circle.style.strokeDashoffset = circ * (1 - pct); }, 100);
+
+  // 점수 숫자 카운트업
+  let cur = 0;
+  const el = document.getElementById('scoreNum');
+  const timer = setInterval(() => {
+    cur = Math.min(cur + 2, r.totalScore);
+    el.textContent = cur;
+    if (cur >= r.totalScore) clearInterval(timer);
+  }, 20);
+
+  // 세부 점수 바
+  const bars = document.getElementById('scoreBars');
+  const scoreItems = [
+    { label: '이미지 품질', key: 'imageQuality' },
+    { label: '가격 경쟁력', key: 'priceCompetitiveness' },
+    { label: '키워드 최적화', key: 'keywordOptimization' },
+    { label: '시장 잠재력', key: 'marketPotential' },
+  ];
+  bars.innerHTML = scoreItems.map(s => {
+    const v = r.scores[s.key] || 0;
+    const c = v >= 70 ? '#4ade80' : v >= 50 ? '#fbbf24' : '#f87171';
+    return `<div class="score-bar-row">
+      <div class="score-bar-label">${s.label}</div>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:0%;background:${c}" data-w="${v}"></div></div>
+      <div class="score-bar-val">${v}</div>
+    </div>`;
+  }).join('');
+  setTimeout(() => {
+    document.querySelectorAll('.score-bar-fill').forEach(b => b.style.width = b.dataset.w + '%');
+  }, 200);
+
+  // 분석 그리드
+  const grid = document.getElementById('analysisGrid');
+  grid.innerHTML = `
+    <div class="analysis-card">
+      <div class="analysis-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        이미지 분석
+      </div>
+      ${(r.imageAnalysis||[]).map(i=>`<div class="analysis-item">${i}</div>`).join('')}
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        시장 분석
+      </div>
+      ${(r.marketAnalysis||[]).map(i=>`<div class="analysis-item">${i}</div>`).join('')}
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg>
+        강점
+      </div>
+      ${(r.strengths||[]).map(i=>`<div class="analysis-item">${i}</div>`).join('')}
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-card-title" style="color:var(--danger);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        리스크
+      </div>
+      ${(r.risks||[]).map(i=>`<div class="analysis-item" style="color:var(--danger);">${i}</div>`).join('')}
+    </div>
+  `;
+
+  // 상세 리포트
+  const rc = document.getElementById('reportCard');
+  const rp = r.report || {};
+  rc.innerHTML = `
+    <div class="card-title">상세 분석 리포트</div>
+    <div class="report-section">
+      <div class="report-section-title">종합 요약</div>
+      <div class="report-text">${rp.summary||''}</div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">이미지 평가</div>
+      <div class="report-text">${rp.imageComment||''}</div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">가격 포지셔닝</div>
+      <div class="report-text">${rp.priceComment||''}</div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">키워드 분석</div>
+      <div class="report-text">${rp.keywordComment||''}</div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">소싱 전략 제언</div>
+      <div class="report-text">${rp.recommendation||''}</div>
+    </div>
+  `;
+
+  // 개선 제안
+  const il = document.getElementById('improveList');
+  il.innerHTML = (r.improvements||[]).map(i=>`
+    <div class="improve-item ${i.type==='warn'?'warn':i.type==='danger'?'danger':''}">
+      <div class="improve-title">${i.title}</div>
+      <div class="improve-desc">${i.desc}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('resultWrap').classList.add('show');
+  document.getElementById('resultWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderHistory() {
+  const wrap = document.getElementById('historyWrap');
+  const list = document.getElementById('historyList');
+  if (!history.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  list.innerHTML = history.map(h => {
+    const color = h.score >= 70 ? '#006242' : h.score >= 50 ? '#8a6000' : '#b00020';
+    return `<div class="history-item">
+      <div>
+        <div class="history-name">${h.name}</div>
+        <div class="history-meta">${h.cat} · ${Number(h.price).toLocaleString()}원 · ${h.ts}</div>
+      </div>
+      <div class="history-score" style="color:${color}">${h.score}</div>
+    </div>`;
+  }).join('');
+}
+
+function clearHistory() {
+  history = [];
+  localStorage.removeItem('rfl_analyzer_history');
+  renderHistory();
+  toast('이력 삭제됨');
+}
+
+function resetAll() {
+  document.getElementById('productName').value = '';
+  document.getElementById('category').value = '';
+  document.getElementById('price').value = '';
+  document.getElementById('keywords').value = '';
+  document.getElementById('cost').value = '';
+  document.getElementById('compPrice').value = '';
+  document.getElementById('platform').value = '';
+  document.getElementById('season').value = '';
+  document.getElementById('diffPoint').value = '';
+  thumbBase64 = null;
+  detailBase64Array = [];
+  document.getElementById('thumbUpload').classList.remove('has-img');
+  document.getElementById('thumbPreview').src = '';
+  document.getElementById('detailUpload').classList.remove('has-img');
+  document.getElementById('detailPreviews').innerHTML = '';
+  document.getElementById('detailIcon').style.display = '';
+  document.getElementById('detailText').style.display = '';
+  document.getElementById('detailCount').style.display = 'none';
+  document.getElementById('resultWrap').classList.remove('show');
+  document.getElementById('emptyState').style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// 초기화
+loadApiKey();
+renderHistory();
+// 저장된 프록시 URL 표시
+const savedProxy = localStorage.getItem('rfl_proxy_url');
+if (savedProxy) {
+  document.getElementById('proxyUrlInput').value = savedProxy;
+  document.getElementById('proxyStatus').textContent = '✓ 저장됨: ' + savedProxy;
+  document.getElementById('proxyStatus').style.color = '#006242';
+}
+</script>
+</body>
+</html>

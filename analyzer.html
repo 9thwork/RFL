@@ -172,23 +172,51 @@ textarea.field{resize:vertical;min-height:72px;line-height:1.6;}
 
 footer{background:var(--on-surface);padding:32px 0;}
 .footer-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+
+/* ── 모바일 햄버거 네비 ── */
+.mob-menu-btn{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+.mob-menu-btn span{display:block;width:22px;height:2px;background:#191c1e;border-radius:2px;transition:all 0.25s;}
+.mob-menu-btn.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.mob-menu-btn.open span:nth-child(2){opacity:0;}
+.mob-menu-btn.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mob-nav-drawer{display:none;position:fixed;top:56px;left:0;right:0;background:rgba(247,249,251,0.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(195,198,215,0.3);padding:16px 24px 20px;z-index:49;flex-direction:column;gap:4px;}
+.mob-nav-drawer.open{display:flex;}
+.mob-nav-drawer a{font-family:'Manrope',sans-serif;font-weight:600;font-size:15px;color:#434655;text-decoration:none;padding:10px 0;border-bottom:1px solid #f0f2f4;transition:color 0.15s;}
+.mob-nav-drawer a:last-child{border-bottom:none;}
+.mob-nav-drawer a:hover,.mob-nav-drawer a.active{color:#004ac6;}
+.mob-nav-drawer .mob-cta{margin-top:8px;padding:11px 20px;background:#004ac6;color:#fff !important;border-radius:9px;text-align:center;font-weight:700 !important;border-bottom:none !important;}
+@media(max-width:768px){.mob-menu-btn{display:flex;}.desk-nav{display:none !important;}.desk-cta{display:none !important;}}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav class="glass-nav">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">RFL<span>.</span></a>
-    <div class="nav-links">
-      <a href="index.html" class="nav-link">홈</a>
-      <a href="labs.html" class="nav-link">Labs</a>
-      <a href="news.html" class="nav-link">뉴스</a>
-      <a href="planner.html" class="nav-link">플래너</a>
-      <a href="analyzer.html" class="nav-link active">분석기</a>
+<nav class="glass-nav" style="position:fixed;top:0;width:100%;z-index:50;">
+  <div style="max-width:1152px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
+    <a href="index.html" style="font-family:Manrope,sans-serif;font-weight:900;font-size:20px;letter-spacing:-0.03em;text-decoration:none;color:#191c1e;">RFL<span class="gradient-text">.</span></a>
+    <div class="desk-nav" style="display:flex;gap:24px;align-items:center;">
+      <a href="index.html" style="font-family:Manrope,sans-serif;font-size:13px;font-weight:500;color:#434655;text-decoration:none;">홈</a>
+      <a href="about.html" style="font-family:Manrope,sans-serif;font-size:13px;font-weight:500;color:#434655;text-decoration:none;">어바웃</a>
+      <a href="labs.html" style="font-family:Manrope,sans-serif;font-size:13px;font-weight:500;color:#434655;text-decoration:none;">Labs</a>
+      <a href="news.html" style="font-family:Manrope,sans-serif;font-size:13px;font-weight:500;color:#434655;text-decoration:none;">뉴스</a>
+      <a href="planner.html" style="font-family:Manrope,sans-serif;font-size:13px;font-weight:500;color:#434655;text-decoration:none;">플래너</a>
+      <a href="https://blog.naver.com" target="_blank" style="font-family:Manrope,sans-serif;font-size:13px;font-weight:500;color:#434655;text-decoration:none;">블로그</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="about.html#contact" class="desk-cta" style="display:inline-flex;align-items:center;background:#004ac6;color:#fff;padding:9px 20px;border-radius:9px;font-family:Manrope,sans-serif;font-weight:700;font-size:13px;text-decoration:none;">문의하기</a>
+      <button class="mob-menu-btn" id="mobBtn" onclick="toggleMobNav()"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
+<div class="mob-nav-drawer" id="mobDrawer">
+  <a href="index.html">홈</a>
+  <a href="about.html">어바웃</a>
+  <a href="labs.html">Labs</a>
+  <a href="news.html">뉴스</a>
+  <a href="planner.html">플래너</a>
+  <a href="https://blog.naver.com" target="_blank">블로그</a>
+  <a href="about.html#contact" class="mob-cta">문의하기</a>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -592,7 +620,7 @@ async function analyze() {
 - 판매가: ${price}원${cost ? `\n- 원가: ${cost}원 (마진율 약 ${margin}%)` : ''}${compPrice ? `\n- 경쟁 최저가: ${compPrice}원` : ''}
 - 주요 키워드: ${keywords}${platform ? `\n- 판매 플랫폼: ${platform}` : ''}${season ? `\n- 계절성: ${season}` : ''}${diff ? `\n- 차별화 포인트: ${diff}` : ''}
 
-${detailBase64Array && detailBase64Array.filter(Boolean).length > 0 ? `썸네일과 상세페이지 이미지 ${detailBase64Array.filter(Boolean).length}장을 첨부했습니다.` : '썸네일 이미지를 첨부했습니다.'}
+${detailBase64 ? '썸네일과 상세페이지 이미지를 모두 첨부했습니다.' : '썸네일 이미지를 첨부했습니다.'}
 
 아래 JSON 형식으로 분석 결과를 출력하세요:
 {
@@ -867,5 +895,16 @@ if (savedProxy) {
   document.getElementById('proxyStatus').style.color = '#006242';
 }
 </script>
-</body>
+<script>
+function toggleMobNav(){
+  document.getElementById('mobBtn').classList.toggle('open');
+  document.getElementById('mobDrawer').classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('nav')&&!e.target.closest('#mobDrawer')){
+    document.getElementById('mobBtn').classList.remove('open');
+    document.getElementById('mobDrawer').classList.remove('open');
+  }
+});
+</script></body>
 </html>

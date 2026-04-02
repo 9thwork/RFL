@@ -257,15 +257,30 @@ body { font-family: 'Noto Sans KR', sans-serif; background: #f7f9fb; color: #191
 
 /* FOOTER */
 footer { background: #191c1e; }
+
+/* ── 모바일 햄버거 네비 ── */
+.mob-menu-btn{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+.mob-menu-btn span{display:block;width:22px;height:2px;background:#191c1e;border-radius:2px;transition:all 0.25s;}
+.mob-menu-btn.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.mob-menu-btn.open span:nth-child(2){opacity:0;}
+.mob-menu-btn.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mob-nav-drawer{display:none;position:fixed;top:56px;left:0;right:0;background:rgba(247,249,251,0.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(195,198,215,0.3);padding:16px 24px 20px;z-index:49;flex-direction:column;gap:4px;}
+.mob-nav-drawer.open{display:flex;}
+.mob-nav-drawer a{font-family:'Manrope',sans-serif;font-weight:600;font-size:15px;color:#434655;text-decoration:none;padding:10px 0;border-bottom:1px solid #f0f2f4;transition:color 0.15s;}
+.mob-nav-drawer a:last-child{border-bottom:none;}
+.mob-nav-drawer a:hover,.mob-nav-drawer a.active{color:#004ac6;}
+.mob-nav-drawer .mob-cta{margin-top:8px;padding:11px 20px;background:#004ac6;color:#fff !important;border-radius:9px;text-align:center;font-weight:700 !important;border-bottom:none !important;}
+@media(max-width:768px){.mob-menu-btn{display:flex;}.desk-nav{display:none !important;}.desk-cta{display:none !important;}}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav class="glass-nav fixed top-0 w-full z-50">
-  <div style="max-width:1152px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
+  <div style="max-width:1152px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
     <a href="index.html" style="font-family:'Manrope',sans-serif;font-weight:900;font-size:20px;letter-spacing:-0.03em;text-decoration:none;color:#191c1e;">RFL<span class="gradient-text">.</span></a>
-    <div style="display:flex;gap:28px;align-items:center;" class="hidden md:flex">
+    <!-- 데스크탑 메뉴 -->
+    <div class="desk-nav" style="display:flex;gap:24px;align-items:center;">
       <a href="index.html" class="nav-link">홈</a>
       <a href="about.html" class="nav-link">어바웃</a>
       <a href="labs.html" class="nav-link active">Labs</a>
@@ -273,9 +288,26 @@ footer { background: #191c1e; }
       <a href="planner.html" class="nav-link">플래너</a>
       <a href="https://blog.naver.com" target="_blank" class="nav-link">블로그</a>
     </div>
-    <a href="about.html#contact" style="display:inline-flex;align-items:center;gap:6px;background:#004ac6;color:#fff;padding:9px 20px;border-radius:9px;font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;text-decoration:none;">문의하기</a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="about.html#contact" class="desk-cta" style="display:inline-flex;align-items:center;background:#004ac6;color:#fff;padding:9px 20px;border-radius:9px;font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;text-decoration:none;">문의하기</a>
+      <!-- 햄버거 버튼 -->
+      <button class="mob-menu-btn" id="mobBtn" onclick="toggleMobNav()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </nav>
+
+<!-- 모바일 드로어 -->
+<div class="mob-nav-drawer" id="mobDrawer">
+  <a href="index.html">홈</a>
+  <a href="about.html">어바웃</a>
+  <a href="labs.html" class="active">Labs</a>
+  <a href="news.html">뉴스</a>
+  <a href="planner.html">플래너</a>
+  <a href="https://blog.naver.com" target="_blank">블로그</a>
+  <a href="about.html#contact" class="mob-cta">문의하기</a>
+</div>
 
 <!-- HERO -->
 <section class="labs-hero" style="padding: 144px 0 80px;">
@@ -759,6 +791,17 @@ function showToast(msg) {
   clearTimeout(t._to);
   t._to = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)'; }, 2200);
 }
+
+function toggleMobNav() {
+  document.getElementById('mobBtn').classList.toggle('open');
+  document.getElementById('mobDrawer').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('nav') && !e.target.closest('#mobDrawer')) {
+    document.getElementById('mobBtn').classList.remove('open');
+    document.getElementById('mobDrawer').classList.remove('open');
+  }
+});
 
 initUrls();
 </script>

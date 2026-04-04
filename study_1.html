@@ -186,7 +186,6 @@ input[type=file]{display:none;}
   <button class="tab-btn" onclick="showTab(2)">🟡 3회</button>
   <button class="tab-btn" onclick="showTab(4)">📋 2~1회</button>
   <button class="tab-btn" onclick="showTab(3)">🔢 계산</button>
-  <button class="tab-btn" onclick="showTab('smart')">⚙️ 스마트플래너</button>
   <button class="tab-btn" onclick="showTab('print')">📥 출력자료</button>
 </div>
 <div class="panel active" id="tab-guide">
@@ -7211,7 +7210,7 @@ function showWeek(n){
 }
 
 function updateProgress(){
-  var checks=document.querySelectorAll('#tab-smart input[type=checkbox]');
+  var checks=document.querySelectorAll('#tab-print input[type=checkbox]');
   var total=checks.length;
   var done=0;
   checks.forEach(function(c){if(c.checked)done++;});
@@ -7241,7 +7240,7 @@ function toggleCluster(id){
 function showTab(n){
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
-  var tabMap=['guide','map','theory',0,1,2,4,3,'smart','print'];
+  var tabMap=['guide','map','theory',0,1,2,4,3,'print'];
   var panelId=(typeof n==='string')?'tab-'+n:'tab'+n;
   var el=document.getElementById(panelId);
   if(el) el.classList.add('active');
@@ -7353,246 +7352,7 @@ function downloadPDF(type) {
 }
 
 
-// ── 스마트플래너 v2 ────────────────────────────────────────────────────
-var SP = { wd: 2.5, we: 5 };
-var spPlan = []; // [{date, hoursAvail, tasks:[{name,hours,color}], memo, checks:[]}]
 
-function spSel(g, v) {
-  SP[g] = v;
-  document.querySelectorAll('.spt-btn[data-g="'+g+'"]').forEach(function(b){
-    b.classList.toggle('spt-on', parseFloat(b.getAttribute('data-v'))===v);
-  });
-}
-
-function updateDday() {
-  var ex = document.getElementById('sp-examdate').value;
-  if(!ex) return;
-  var diff = Math.ceil((new Date(ex) - new Date()) / 86400000);
-  var el = document.getElementById('sp-remain');
-  if(el) el.textContent = diff > 0 ? 'D-'+diff : diff===0 ? 'D-DAY!' : '시험 지남';
-}
-
-var TASKS = [
-  { name:'📖 이론요약 1회독 (th-01~th-25)', hours:7,   color:'#c8f135' },
-  { name:'🔴 5회이상 No.001~014 암기',      hours:3.5, color:'#ff6b6b' },
-  { name:'🟠 4회 No.001~012 암기',          hours:3.0, color:'#ffa726' },
-  { name:'🟡 3회 No.001~016 암기',          hours:4.0, color:'#fdcb6e' },
-  { name:'🔢 계산 5문제 공식+풀이',         hours:2.5, color:'#74b9ff' },
-  { name:'📋 2~1회 No.001~020 보충',        hours:5.0, color:'#55efc4' },
-  { name:'🔄 전체 복습 + 취약카드 반복',    hours:8.0, color:'#a29bfe' },
-  { name:'🎯 모의테스트 + 오답 분석',       hours:3.0, color:'#c8f135' },
-];
-var TOTAL_H = TASKS.reduce(function(a,t){return a+t.hours;},0);
-
-function getDays(startStr, examStr) {
-  var s = startStr ? new Date(startStr) : new Date();
-  s.setHours(0,0,0,0);
-  var e = new Date(examStr); e.setHours(0,0,0,0);
-  var days = []; var c = new Date(s);
-  while(c <= e){ days.push(new Date(c)); c.setDate(c.getDate()+1); }
-  return days;
-}
-
-function dayH(d){ var w=d.getDay(); return (w===0||w===6)?SP.we:SP.wd; }
-function fmtD(d){
-  var W=['일','월','화','수','목','금','토'];
-  return (d.getMonth()+1)+'/'+d.getDate()+'('+W[d.getDay()]+')';
-}
-function padZ(n){ return n<10?'0'+n:''+n; }
-
-function genPlan() {
-  var examStr = document.getElementById('sp-examdate').value;
-  if(!examStr){ showToast('⚠️ 시험일을 입력해주세요!'); return; }
-  var startStr = document.getElementById('sp-startdate').value;
-  var days = getDays(startStr, examStr);
-  if(days.length < 2){ showToast('⚠️ 시험일이 너무 가까워요!'); return; }
-
-  var totalAvail = days.reduce(function(a,d){return a+(d.toDateString()===days[days.length-1].toDateString()?0:dayH(d));},0);
-  var scale = Math.min(1.0, totalAvail / TOTAL_H);
-
-  // 태스크별 날짜 배분
-  spPlan = days.map(function(d,i){
-    return { date:d, hoursAvail: i===days.length-1?0:dayH(d), tasks:[], memo:'', checks:[] };
-  });
-
-  var dayIdx=0, dayUsed=0;
-  TASKS.forEach(function(task){
-    var rem = task.hours * scale;
-    while(rem > 0.1 && dayIdx < spPlan.length-1){
-      var avail = spPlan[dayIdx].hoursAvail - dayUsed;
-      if(avail < 0.1){ dayIdx++; dayUsed=0; return; }
-      var use = Math.min(rem, avail);
-      if(use > 0.1){
-        spPlan[dayIdx].tasks.push({name:task.name, hours:use, color:task.color});
-        dayUsed += use; rem -= use;
-      }
-      if(spPlan[dayIdx].hoursAvail - dayUsed < 0.15){ dayIdx++; dayUsed=0; }
-    }
-  });
-
-  // 남은 날 복습 채우기
-  for(var i=dayIdx; i<spPlan.length-1; i++){
-    var used = spPlan[i].tasks.reduce(function(a,t){return a+t.hours;},0);
-    var free = spPlan[i].hoursAvail - used;
-    if(free > 0.2) spPlan[i].tasks.push({name:'🔄 복습 + 취약카드 반복', hours:free, color:'#a29bfe'});
-  }
-  // 시험일
-  spPlan[spPlan.length-1].tasks = [{name:'🎯 시험일 — 두음 키워드 1회전 → 화이팅!', hours:0, color:'#c8f135'}];
-
-  // 체크박스 초기화
-  spPlan.forEach(function(day){
-    day.checks = day.tasks.map(function(){ return false; });
-  });
-
-  // 요약 렌더
-  var diff = Math.ceil((new Date(examStr)-new Date())/86400000);
-  var ddStr = diff>0?'D-'+diff:diff===0?'D-DAY!':'시험 지남';
-  document.getElementById('sp-summary').innerHTML =
-    '<div class="sp-stat-grid">' +
-    mkStat2(ddStr,'시험까지','#c8f135') +
-    mkStat2(days.length+'일','총 학습일','#74b9ff') +
-    mkStat2(Math.round(totalAvail)+'h','가용시간','#55efc4') +
-    mkStat2(Math.round(TOTAL_H*scale)+'h','계획량','#a29bfe') +
-    '</div>' +
-    (scale<0.85?'<div style="margin-top:12px;font-size:14px;color:#ffb347;padding:10px 12px;background:rgba(255,179,71,0.1);border-radius:8px;border-left:3px solid #ffb347;">⚠️ 시간이 빠듯해요. 고빈도(🔴🟠) 위주로 집중하세요.</div>':'<div style="margin-top:12px;font-size:14px;color:#55efc4;padding:10px 12px;background:rgba(85,239,196,0.08);border-radius:8px;border-left:3px solid #55efc4;">✅ 충분한 시간! 전체 커버 가능합니다.</div>');
-
-  document.getElementById('sp-count-label').textContent = '📆 일정표 ('+days.length+'일) — 각 날짜 직접 수정 가능';
-  renderDays();
-
-  document.getElementById('sp-result').style.display='block';
-  document.getElementById('sp-result').scrollIntoView({behavior:'smooth',block:'start'});
-  updateSpProgress();
-  showToast('✅ '+days.length+'일 플래너 생성 완료!');
-}
-
-function mkStat2(val,lbl,color){
-  return '<div class="sp-stat"><div class="sp-stat-val" style="color:'+color+'">'+val+'</div><div class="sp-stat-lbl">'+lbl+'</div></div>';
-}
-
-function renderDays(){
-  var container = document.getElementById('sp-days');
-  container.innerHTML = '';
-  spPlan.forEach(function(day, di){
-    var isExam = di === spPlan.length-1;
-    var isWeekend = day.date.getDay()===0||day.date.getDay()===6;
-    var borderColor = isExam?'#c8f135':isWeekend?'#fdcb6e':'#3a4060';
-    var card = document.createElement('div');
-    card.className = 'sp-day-card';
-    card.style.borderLeft = '4px solid '+borderColor;
-
-    // 헤더
-    var h = day.hoursAvail;
-    var headHtml = '<div class="sp-day-head">' +
-      '<span class="sp-day-date" style="color:'+(isExam?'#c8f135':isWeekend?'#fdcb6e':'#f0f2f8')+'">'+fmtD(day.date)+(isExam?' 🎯 시험일':isWeekend?' ☀️':'')+'</span>' +
-      (h>0?'<span class="sp-day-hours">'+h+'h</span>':'') +
-      '</div>';
-
-    // 바디 — 태스크 체크박스들
-    var bodyHtml = '<div class="sp-day-body">';
-    day.tasks.forEach(function(task, ti){
-      var chkId = 'sp-chk-'+di+'-'+ti;
-      bodyHtml += '<div class="sp-chk-wrap">' +
-        '<input type="checkbox" class="sp-chk" id="'+chkId+'" '+(day.checks[ti]?'checked':'')+' onchange="spCheck('+di+','+ti+',this.checked)">' +
-        '<label class="sp-chk-label" for="'+chkId+'" style="color:'+(day.checks[ti]?'#6a7090':'#e8ecf8');
-      if(day.checks[ti]) bodyHtml += ';text-decoration:line-through';
-      bodyHtml += '">';
-      bodyHtml += '<span style="color:'+task.color+';margin-right:4px;">●</span>'+task.name;
-      if(task.hours>0.05) bodyHtml += ' <span style="color:#6a7090;font-size:13px;">('+task.hours.toFixed(1)+'h)</span>';
-      bodyHtml += '</label></div>';
-    });
-
-    // 직접 수정 메모 칸
-    if(!isExam){
-      bodyHtml += '<textarea class="sp-memo" placeholder="📝 오늘 할 일 추가 or 메모..." onchange="spMemo('+di+',this.value)">'+day.memo+'</textarea>';
-    }
-    bodyHtml += '</div>';
-
-    card.innerHTML = headHtml + bodyHtml;
-    container.appendChild(card);
-  });
-}
-
-function spCheck(di, ti, val){
-  if(spPlan[di]) spPlan[di].checks[ti] = val;
-  // 취소선 토글
-  var lbl = document.querySelector('label[for="sp-chk-'+di+'-'+ti+'"]');
-  if(lbl){
-    lbl.style.color = val ? '#6a7090' : '#e8ecf8';
-    lbl.style.textDecoration = val ? 'line-through' : '';
-  }
-  updateSpProgress();
-}
-
-function spMemo(di, val){
-  if(spPlan[di]) spPlan[di].memo = val;
-}
-
-function updateSpProgress(){
-  var total=0, done=0;
-  spPlan.forEach(function(day){
-    day.checks.forEach(function(c){ total++; if(c) done++; });
-  });
-  if(total===0) return;
-  var pct = Math.round(done/total*100);
-  var barEl = document.getElementById('sp-bar');
-  var pctEl = document.getElementById('sp-pct');
-  var doneEl = document.getElementById('sp-done');
-  if(barEl) barEl.style.width = pct+'%';
-  if(pctEl) pctEl.textContent = pct+'%';
-  if(doneEl) doneEl.textContent = done+' / '+total+' 완료';
-}
-
-// ── ICS 내보내기 ─────────────────────────────────────────────────────
-function exportICS(){
-  if(!spPlan.length){ showToast('⚠️ 먼저 플래너를 생성해주세요!'); return; }
-
-  function toICSDate(d){
-    return d.getFullYear()+padZ(d.getMonth()+1)+padZ(d.getDate());
-  }
-  function uid(){ return Math.random().toString(36).slice(2)+Date.now(); }
-  function escICS(s){ return s.replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n'); }
-
-  var lines = [
-    'BEGIN:VCALENDAR','VERSION:2.0',
-    'PRODID:-//직업상담사2급 스마트플래너//KO',
-    'CALSCALE:GREGORIAN','METHOD:PUBLISH',
-    'X-WR-CALNAME:직업상담사 2급 학습 플래너',
-    'X-WR-TIMEZONE:Asia/Seoul'
-  ];
-
-  spPlan.forEach(function(day){
-    if(!day.tasks.length) return;
-    var dateStr = toICSDate(day.date);
-    var taskNames = day.tasks.map(function(t){return t.name+(t.hours>0.05?' ('+t.hours.toFixed(1)+'h)':'');}).join('\\n');
-    var desc = taskNames + (day.memo ? '\\n\\n📝 메모: '+escICS(day.memo) : '');
-    var title = day.tasks[0].name.length > 20 ? day.tasks[0].name.slice(0,20)+'…' : day.tasks[0].name;
-
-    lines.push('BEGIN:VEVENT');
-    lines.push('DTSTART;VALUE=DATE:'+dateStr);
-    lines.push('DTEND;VALUE=DATE:'+dateStr);
-    lines.push('SUMMARY:'+escICS(title));
-    lines.push('DESCRIPTION:'+desc);
-    lines.push('UID:'+uid()+'@jikup');
-    lines.push('BEGIN:VALARM');
-    lines.push('TRIGGER:-PT30M');
-    lines.push('ACTION:DISPLAY');
-    lines.push('DESCRIPTION:오늘 학습 시간입니다!');
-    lines.push('END:VALARM');
-    lines.push('END:VEVENT');
-  });
-
-  lines.push('END:VCALENDAR');
-
-  var icsStr = lines.join('\r\n');
-  var blob = new Blob([icsStr], {type:'text/calendar;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = '직업상담사2급_학습플래너.ics';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  setTimeout(function(){URL.revokeObjectURL(url);},1000);
-  showToast('📅 .ics 다운로드 완료! 캘린더 앱에서 가져오기 하세요');
-}
 
 </script>
 
@@ -8727,98 +8487,9 @@ function exportICS(){
 </div>
 
 <!-- ===== ⚙️ 스마트 플래너 탭 ===== -->
-<div class="panel" id="tab-smart">
-<div style="padding:20px 16px 140px;">
-
-  <!-- 헤더 -->
-  <div style="text-align:center;margin-bottom:22px;">
-    <div style="font-size:24px;font-weight:900;color:#c8f135;letter-spacing:2px;">⚙️ 스마트 플래너</div>
-    <div style="font-size:14px;color:#aab0c8;margin-top:6px;">시험일 입력 → 자동 생성 → 직접 수정</div>
-  </div>
-
-  <!-- 진도 바 -->
-  <div style="background:#1e2235;border-radius:14px;padding:16px;margin-bottom:20px;border:1px solid #2e3450;">
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-      <span style="font-size:15px;font-weight:700;color:#c8f135;">📊 전체 진도율</span>
-      <span style="font-size:15px;font-weight:900;color:#c8f135;" id="sp-pct">0%</span>
-    </div>
-    <div style="background:#252a3a;border-radius:8px;height:14px;overflow:hidden;">
-      <div id="sp-bar" style="background:linear-gradient(90deg,#c8f135,#55efc4);height:100%;width:0%;border-radius:8px;transition:width 0.4s;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-top:8px;">
-      <span style="font-size:13px;color:#aab0c8;" id="sp-done">0 / 0 완료</span>
-      <span style="font-size:13px;color:#aab0c8;" id="sp-remain">D-??</span>
-    </div>
-  </div>
-
-  <!-- 입력 폼 -->
-  <div style="background:#1e2235;border:1px solid #2e3450;border-radius:18px;padding:22px;margin-bottom:20px;">
-    <div style="font-size:16px;font-weight:700;color:#c8f135;margin-bottom:18px;">📅 학습 조건 설정</div>
-
-    <div style="margin-bottom:16px;">
-      <label style="font-size:14px;font-weight:700;color:#d0d4e8;display:block;margin-bottom:8px;">🎯 목표 시험일</label>
-      <input type="date" id="sp-examdate" oninput="updateDday()"
-        style="width:100%;padding:13px 15px;background:#0d0f14;border:2px solid #3a4060;border-radius:12px;color:#f0f2f8;font-family:inherit;font-size:16px;font-weight:700;box-sizing:border-box;" />
-    </div>
-
-    <div style="margin-bottom:16px;">
-      <label style="font-size:14px;font-weight:700;color:#d0d4e8;display:block;margin-bottom:8px;">📆 시작일 <span style="font-size:12px;font-weight:400;color:#8a8fa8;">(비워두면 오늘)</span></label>
-      <input type="date" id="sp-startdate"
-        style="width:100%;padding:13px 15px;background:#0d0f14;border:2px solid #3a4060;border-radius:12px;color:#f0f2f8;font-family:inherit;font-size:16px;font-weight:700;box-sizing:border-box;" />
-    </div>
-
-    <div style="margin-bottom:16px;">
-      <label style="font-size:14px;font-weight:700;color:#d0d4e8;display:block;margin-bottom:10px;">⏱️ 평일 가용시간</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="spt-btn" data-g="wd" data-v="1"   onclick="spSel('wd',1)">1h</button>
-        <button class="spt-btn" data-g="wd" data-v="1.5" onclick="spSel('wd',1.5)">1.5h</button>
-        <button class="spt-btn spt-on" data-g="wd" data-v="2.5" onclick="spSel('wd',2.5)">2.5h</button>
-        <button class="spt-btn" data-g="wd" data-v="3"   onclick="spSel('wd',3)">3h</button>
-        <button class="spt-btn" data-g="wd" data-v="4"   onclick="spSel('wd',4)">4h</button>
-      </div>
-    </div>
-
-    <div style="margin-bottom:22px;">
-      <label style="font-size:14px;font-weight:700;color:#d0d4e8;display:block;margin-bottom:10px;">⏱️ 주말 가용시간</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="spt-btn" data-g="we" data-v="2"   onclick="spSel('we',2)">2h</button>
-        <button class="spt-btn" data-g="we" data-v="3"   onclick="spSel('we',3)">3h</button>
-        <button class="spt-btn spt-on" data-g="we" data-v="5" onclick="spSel('we',5)">5h</button>
-        <button class="spt-btn" data-g="we" data-v="7"   onclick="spSel('we',7)">7h</button>
-        <button class="spt-btn" data-g="we" data-v="8"   onclick="spSel('we',8)">8h</button>
-      </div>
-    </div>
-
-    <button onclick="genPlan()"
-      style="width:100%;padding:16px;background:linear-gradient(135deg,#c8f135,#55efc4);color:#0d0f14;border:none;border-radius:14px;font-family:inherit;font-size:17px;font-weight:900;cursor:pointer;letter-spacing:1px;">
-      ⚙️ 플래너 자동 생성
-    </button>
-  </div>
-
-  <!-- 결과 영역 -->
-  <div id="sp-result" style="display:none;">
-
-    <!-- 요약 카드 -->
-    <div id="sp-summary" style="background:#1e2235;border:1px solid #2e3450;border-radius:14px;padding:16px;margin-bottom:16px;"></div>
-
-    <!-- ICS 내보내기 버튼 -->
-    <button onclick="exportICS()"
-      style="width:100%;padding:14px;background:rgba(116,185,255,0.15);color:#74b9ff;border:2px solid rgba(116,185,255,0.4);border-radius:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px;letter-spacing:0.5px;">
-      📅 구글캘린더로 내보내기 (.ics 다운로드)
-    </button>
-
-    <!-- 일정 카드 목록 -->
-    <div style="font-size:15px;font-weight:700;color:#f0f2f8;margin-bottom:12px;" id="sp-count-label"></div>
-    <div id="sp-days"></div>
-
-  </div>
-</div>
-</div>
 
 <div class="save-bar">
-  <a href="https://rfl.co.kr/labs.html" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 16px;background:rgba(255,255,255,0.06);color:#f0f2f8;border:1px solid rgba(255,255,255,0.12);border-radius:12px;font-family:inherit;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">
-    ← RFL
-  </a>
+  <a href="https://rfl.co.kr/labs.html" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 16px;background:rgba(255,255,255,0.06);color:#f0f2f8;border:1px solid rgba(255,255,255,0.12);border-radius:12px;font-family:inherit;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">← RFL</a>
   <button class="save-btn" onclick="saveFile()">💾 이미지 포함 저장</button>
   <div class="save-info">이미지를 업로드한 후<br>저장하면 파일에 포함됩니다</div>
 </div>

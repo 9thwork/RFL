@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>직업상담사 2급 실기 기출문제 2025</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@700&display=swap');
+
+  :root {
+    --bg: #0d0f18;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --accent: #c8f135;
+    --accent2: #74b9ff;
+    --accent3: #fd79a8;
+    --accent4: #55efc4;
+    --accent5: #ffeaa7;
+    --text: #e8eaf0;
+    --text-dim: #8890a8;
+    --text-bright: #ffffff;
+    --r1: #ff6b6b;
+    --r2: #ffa94d;
+    --r3: #c8f135;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ── 상단 헤더 ── */
+  .top-header {
+    background: linear-gradient(135deg, #141720 0%, #1a1f35 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 16px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .top-header h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+  }
+  .top-header p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* ── 탭 네비 ── */
+  .tab-nav {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 73px;
+    z-index: 99;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 700;
+  }
+  .tab-btn:not(.active):hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── 섹션 ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── 회차 헤더 ── */
+  .exam-header {
+    margin: 20px 16px 0;
+    padding: 16px 20px;
+    background: var(--surface);
+    border-radius: 12px;
+    border-left: 4px solid var(--accent);
+  }
+  .exam-header .date {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .exam-header .title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text-bright);
+  }
+  .exam-header .subtitle {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* ── 문제 카드 ── */
+  .q-list {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .q-card {
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .q-card:hover { border-color: rgba(200,241,53,0.3); }
+
+  /* 문제 헤더 */
+  .q-head {
+    padding: 16px 18px 14px;
+    cursor: pointer;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .q-num {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(200,241,53,0.12);
+    border: 1.5px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .q-body { flex: 1; }
+  .q-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .tag-freq {
+    background: rgba(255,107,107,0.15);
+    color: var(--r1);
+    border: 1px solid rgba(255,107,107,0.3);
+  }
+  .tag-new {
+    background: rgba(200,241,53,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(200,241,53,0.3);
+  }
+  .tag-score {
+    background: rgba(116,185,255,0.12);
+    color: var(--accent2);
+    border: 1px solid rgba(116,185,255,0.3);
+  }
+  .tag-year {
+    background: rgba(255,234,167,0.1);
+    color: var(--accent5);
+    border: 1px solid rgba(255,234,167,0.25);
+    font-weight: 500;
+  }
+  .q-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-bright);
+    line-height: 1.55;
+    word-break: keep-all;
+  }
+  .toggle-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 18px;
+    transition: transform 0.25s;
+    margin-top: 2px;
+  }
+  .q-card.open .toggle-icon { transform: rotate(180deg); }
+
+  /* 답안 영역 */
+  .ans-area {
+    display: none;
+    padding: 0 18px 18px;
+    border-top: 1px solid var(--border);
+    margin-top: 0;
+  }
+  .q-card.open .ans-area { display: block; }
+  .ans-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+    padding: 12px 0 10px;
+  }
+
+  /* 답안 아이템 */
+  .ans-item {
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border-left: 3px solid var(--accent);
+  }
+  .ans-item.sub {
+    border-left-color: var(--border);
+    background: transparent;
+    padding: 6px 14px;
+    opacity: 0.75;
+    font-size: 13px;
+  }
+  .ans-item .num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .ans-item .key {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .ans-item .desc {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .ans-item.sub .key { font-size: 13px; color: var(--text-dim); }
+  .ans-item.sub .desc { font-size: 12px; color: var(--text-dim); }
+
+  /* 단순 목록 */
+  .ans-simple {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .ans-simple.col1 { grid-template-columns: 1fr; }
+  .ans-simple .item {
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .ans-simple .item .i-num {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  /* 계산 공식 */
+  .formula-box {
+    background: rgba(200,241,53,0.06);
+    border: 1px solid rgba(200,241,53,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .formula-box .f-title {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .formula-box .f-main {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.6;
+    font-family: monospace;
+  }
+  .formula-box .f-result {
+    margin-top: 6px;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--accent4);
+  }
+
+  /* 표 */
+  .tbl-wrap { overflow-x: auto; margin-bottom: 10px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: rgba(200,241,53,0.1);
+    color: var(--accent);
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    font-weight: 700;
+    text-align: center;
+    font-size: 12px;
+  }
+  td {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-align: center;
+    font-size: 13px;
+  }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .td-hl { color: var(--accent4); font-weight: 700; }
+
+  /* 포인트 박스 */
+  .point-box {
+    background: rgba(116,185,255,0.08);
+    border: 1px solid rgba(116,185,255,0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--accent2);
+    line-height: 1.6;
+  }
+  .point-box strong { color: var(--text-bright); }
+
+  /* 진도 바 */
+  .progress-bar-wrap {
+    padding: 12px 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+  .progress-text {
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* 전체보기/접기 버튼 */
+  .control-bar {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 4px;
+  }
+  .ctrl-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* 통계 요약 */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 16px 16px 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-card .s-num {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-card .s-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* 전체 탭 - 모든 회차 */
+  .all-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    padding: 20px 16px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <h1>📋 직업상담사 2급 실기 기출</h1>
+  <p>2025년 1·2·3회 전체 수록 · 문제 탭 클릭시 답안 표시</p>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('all')">전체</button>
+  <button class="tab-btn" onclick="switchTab('r1')">2025 1회 <span style="color:#ff6b6b">●</span></button>
+  <button class="tab-btn" onclick="switchTab('r2')">2025 2회 <span style="color:#ffa94d">●</span></button>
+  <button class="tab-btn" onclick="switchTab('r3')">2025 3회 <span style="color:#c8f135">●</span></button>
+</div>
+
+<!-- ═══════════════════ 전체 탭 ═══════════════════ -->
+<div class="section active" id="tab-all">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="s-num">54</div><div class="s-label">총 문제수</div></div>
+    <div class="stat-card"><div class="s-num" style="color:var(--accent3)">8</div><div class="s-label">신출문제</div></div>
+    <div class="stat-card"><div class="s-num" style="color:var(--accent2)">3</div><div class="s-label">회차</div></div>
+  </div>
+  <div class="control-bar">
+    <button class="ctrl-btn" onclick="expandAll('all')">▼ 전체 답안 열기</button>
+    <button class="ctrl-btn" onclick="collapseAll('all')">▲ 전체 접기</button>
+  </div>
+
+  <div class="all-section-title">▎ 2025년 1회 (4월 20일)</div>
+  <div class="q-list" id="list-all-r1"></div>
+
+  <div class="all-section-title">▎ 2025년 2회 (7월 19일)</div>
+  <div class="q-list" id="list-all-r2"></div>
+
+  <div class="all-section-title">▎ 2025년 3회 (11월 8일)</div>
+  <div class="q-list" id="list-all-r3"></div>
+</div>
+
+<!-- ═══════════════════ 1회 탭 ═══════════════════ -->
+<div class="section" id="tab-r1">
+  <div class="exam-header">
+    <div class="date">2025년 4월 20일 일요일</div>
+    <div class="title">2025년 1회 직업상담사 2급 실기</div>
+    <div class="subtitle">총 18문제 · 100점 만점</div>
+  </div>
+  <div class="control-bar">
+    <button class="ctrl-btn" onclick="expandAll('r1')">▼ 전체 답안 열기</button>
+    <button class="ctrl-btn" onclick="collapseAll('r1')">▲ 전체 접기</button>
+  </div>
+  <div class="q-list" id="list-r1"></div>
+</div>
+
+<!-- ═══════════════════ 2회 탭 ═══════════════════ -->
+<div class="section" id="tab-r2">
+  <div class="exam-header">
+    <div class="date">2025년 7월 19일 토요일</div>
+    <div class="title">2025년 2회 직업상담사 2급 실기</div>
+    <div class="subtitle">총 18문제 · 100점 만점</div>
+    <div style="margin-top:8px;"><span class="tag tag-new">신출 2문항</span></div>
+  </div>
+  <div class="control-bar">
+    <button class="ctrl-btn" onclick="expandAll('r2')">▼ 전체 답안 열기</button>
+    <button class="ctrl-btn" onclick="collapseAll('r2')">▲ 전체 접기</button>
+  </div>
+  <div class="q-list" id="list-r2"></div>
+</div>
+
+<!-- ═══════════════════ 3회 탭 ═══════════════════ -->
+<div class="section" id="tab-r3">
+  <div class="exam-header">
+    <div class="date">2025년 11월 8일 토요일</div>
+    <div class="title">2025년 3회 직업상담사 2급 실기</div>
+    <div class="subtitle">총 18문제 · 100점 만점</div>
+    <div style="margin-top:8px;"><span class="tag tag-new">신출 4문항</span></div>
+  </div>
+  <div class="control-bar">
+    <button class="ctrl-btn" onclick="expandAll('r3')">▼ 전체 답안 열기</button>
+    <button class="ctrl-btn" onclick="collapseAll('r3')">▲ 전체 접기</button>
+  </div>
+  <div class="q-list" id="list-r3"></div>
+</div>
+
+<script>
+/* ────────────────────────── DATA ────────────────────────── */
+const DATA = {
+  r1: [
+    {
+      n: 1, score: 5, tags: ['25-1, 7-1년'],
+      q: '내담자가 상담자에게 지나치게 의존하려는 전이가 일어났을 때, 그 의미와 해결방안을 설명하시오.',
+      ans: [
+        { key: '의미', desc: '내담자가 과거의 중요한 인물에게서 느꼈던 감정이나 생각을 상담자에게 투사하는 것을 말한다.' },
+        { key: '해결방안', desc: '상담자는 전이를 분석하고 해석함으로써 내담자의 무의식적 갈등과 문제의 의미를 통찰하도록 훈습을 통해 지속적으로 돕는다.' },
+      ]
+    },
+    {
+      n: 2, score: 8, tags: ['6개년★', '25-1, 22, 20, 18, 16, 13년'],
+      q: '아들러(Adler)의 개인주의 상담과정의 목표 4가지를 쓰시오.',
+      simple: ['① 패배감 극복, 열등감을 감소시키도록 돕는다', '② 잘못된 가치와 목표를 수정하도록 돕는다', '③ 잘못된 동기를 수정하도록 돕는다', '④ 사회적 관심을 갖도록 돕는다']
+    },
+    {
+      n: 3, score: 6, tags: ['3개년★', '25-1, 19, 12년'],
+      q: '실직 후 "나는 무능하다" 하는 부정적인 자동적 사고가 떠올라 우울감에 빠진 내담자에게 벡(Beck)의 인지 행동적 상담을 하려고 한다. 부정적인 사고를 반박하고 합리적 사고로 변화시키기 위한 상담기법 3가지를 쓰고 설명하시오.',
+      ans: [
+        { key: '① 정서적 기법', desc: '자동적 사고를 파악하여 합리적 정서로 변화시킨다.' },
+        { key: '② 언어적 기법', desc: '부정적 사고를 논박하여 내담자의 언어 변화를 유도한다.' },
+        { key: '③ 행동적 기법', desc: '목표행동을 수행하도록 하여 인지변화를 촉구한다.' },
+      ]
+    },
+    {
+      n: 4, score: 6, tags: ['8개년★', '25-1, 22, 19, 17, 15, 11, 8, 6년'],
+      q: '브레이필드(Brayfield)가 제시한 직업정보의 기능 3가지를 쓰고 설명하시오.',
+      ans: [
+        { key: '① 정보적 기능', desc: '직업선택에 관한 지식을 증가시킨다.' },
+        { key: '② 재조정 기능', desc: '자신의 선택을 점검 및 재조정하게 해준다.' },
+        { key: '③ 동기화 기능', desc: '자신의 선택에 대해 책임감을 갖게 한다.' },
+      ]
+    },
+    {
+      n: 5, score: 5, tags: ['6개년★', '25-1, 23, 20, 17, 9, 3년'],
+      q: '수퍼(Super)의 직업발달(경력개발) 5단계를 쓰고, 각 단계에 대해 설명하시오.',
+      ans: [
+        { key: '① 성장기', desc: '가정과 학교에서 자아개념 발달' },
+        { key: '② 탐색기', desc: '다양한 활동으로 자아 검증 및 직업 탐색' },
+        { key: '③ 확립기', desc: '적합한 직업 선택 및 기반 다짐' },
+        { key: '④ 유지기', desc: '직업에 안착해 안정된 생활 유지' },
+        { key: '⑤ 쇠퇴기', desc: '은퇴 준비 및 새로운 활동 모색' },
+      ]
+    },
+    {
+      n: 6, score: 8, tags: ['6회★', '25-1, 23, 16, 15, 11-3·2년'],
+      q: '고트프레드슨(Gottfredson)의 직업과 관련된 개인발달 4단계를 쓰고 각각 설명하시오.',
+      ans: [
+        { key: '① 힘의 크기 지향성', desc: '서열을 깨닫는 단계 (3~5세)' },
+        { key: '② 성역할 지향성', desc: '성에 따른 역할 차이를 깨닫는 단계 (6~8세)' },
+        { key: '③ 사회 가치 지향성', desc: '사회적 가치를 깨닫는 단계 (9~13세)' },
+        { key: '④ 내적 고유한 자아 지향성', desc: '자아정체감이 발달하는 단계 (14세 이후)' },
+      ]
+    },
+    {
+      n: 7, score: 6, tags: ['3개년★', '25-1, 21, 16년'],
+      q: '홀랜드(Holland)의 개인과 개인 간의 관계, 환경과 환경간의 관계, 개인과 환경간의 관계를 설명하는 개념 3가지를 쓰고 설명하시오.',
+      ans: [
+        { key: '① 일관성 (개인↔개인)', desc: '6가지 유형 간 거리가 가까울수록 유사점이 많고, 멀리 있는 유형은 유사점이 적거나 없다.' },
+        { key: '② 일치성 (개인↔환경)', desc: '개인 흥미유형과 일하고 있는 환경의 부합 정도를 말한다.' },
+        { key: '③ 계측성 (환경↔환경)', desc: '흥미·환경유형 간 거리는 이론적 관계에 반비례한다.' },
+      ]
+    },
+    {
+      n: 8, score: 6, tags: ['3개년★', '25-1, 19, 15년'],
+      q: '진로시간전망 검사지의 사용용도를 3가지 쓰시오.',
+      simple: ['① 미래의 방향을 이끌어내기 위해', '② 미래에 대한 희망을 주기 위해', '③ 미래를 실제처럼 느끼도록 하기 위해', '(+계획에 대한 긍정적 태도 강화)', '(+목표설정 촉구)', '(+진로의식 향상)']
+    },
+    {
+      n: 9, score: 6, tags: ['신출 25-1'],
+      q: '코틀의 원형검사에서 원의 의미를 3가지 쓰시오.',
+      simple: ['① 과거', '② 현재', '③ 미래'],
+      isNew: true
+    },
+    {
+      n: 10, score: 9, tags: ['3개년★', '25-1, 22, 15년'],
+      q: '일반적성검사(GATB)에서 사용되는 9개의 적성항목을 쓰시오.',
+      simple: ['① 지능', '② 언어적성', '③ 수리능력', '④ 사무지각', '⑤ 공간적성', '⑥ 형태지각', '⑦ 운동반응', '⑧ 손의 정교성', '⑨ 손가락 정교성']
+    },
+    {
+      n: 11, score: 3, tags: ['25-1, 12-1년'],
+      q: '규준의 종류 중 발달규준 3가지 쓰시오.',
+      simple: ['① 연령규준', '② 학년규준', '③ 단계규준']
+    },
+    {
+      n: 12, score: 4, tags: ['3개년★', '25-1, 22, 20년'],
+      q: '타당도의 종류 4가지를 쓰시오.',
+      simple: ['① 안면타당도', '② 내용타당도', '③ 구성타당도', '④ 준거타당도']
+    },
+    {
+      n: 13, score: 4, tags: ['25-1, 9-3년'],
+      q: '개념준거와 실제준거의 의미를 설명하시오.',
+      ans: [
+        { key: '개념준거', desc: '연구자가 이해하고자 하는 이론적인 기준으로, 실질적으로는 측정 불가능한 추상적 개념의 준거' },
+        { key: '실제준거', desc: '연구자가 실제 측정·평가에 사용하는 기준으로, 개념준거를 현실적으로 측정 가능한 형태로 변환한 준거' },
+      ]
+    },
+    {
+      n: 14, score: 4, tags: ['3개년★', '25-1, 23, 21년'],
+      q: '직무평가기법 4가지를 쓰시오.',
+      simple: ['① 서열법', '② 분류법', '③ 점수법', '④ 요소비교법']
+    },
+    {
+      n: 15, score: 4, tags: ['25-1, 23년'],
+      q: '한국표준직업분류에서 직업분류의 일반원칙 2가지를 쓰고 설명하시오.',
+      ans: [
+        { key: '① 포괄성의 원칙', desc: '모든 직업은 직업분류에 포함되어야 한다.' },
+        { key: '② 배타성의 원칙', desc: '동일하거나 유사한 직무는 같은 단위 직업으로 분류해야 한다.' },
+      ]
+    },
+    {
+      n: 16, score: 6, tags: ['8개년★', '25-1, 19, 17, 12, 11, 9, 8, 7년'],
+      q: '한국표준산업분류의 산업분류 기준 3가지를 쓰시오.',
+      simple: ['① 산출물의 특성', '② 투입물의 특성', '③ 생산활동(생산공정)의 일반적인 결합 형태']
+    },
+    {
+      n: 17, score: 5, tags: ['4개년★', '25-1, 22, 19, 13년'],
+      q: '산업별로 임금격차가 발생하는 원인 5가지를 쓰시오.',
+      ans: [
+        { key: '① 노동생산성 차이', desc: '생산성이 높은 산업은 더 높은 급여를 지급한다.' },
+        { key: '② 노동조합 존재 여부', desc: '강력한 노조가 있는 산업은 임금 협상력이 높다.' },
+        { key: '③ 산업별 수요 차이', desc: '노동수요가 높은 산업일수록 임금이 높다.' },
+        { key: '④ 산업별 집중도 차이', desc: '독점적 산업은 높은 이윤으로 높은 임금 지급이 가능하다.' },
+        { key: '⑤ 보상적 임금', desc: '열악한 근무환경의 산업은 금전적 보상으로 임금을 높게 책정한다.' },
+      ]
+    },
+    {
+      n: 18, score: 5, tags: ['계산문제'],
+      q: 'A회사의 9월말 사원수는 2,000명이었다. 신규채용인원수는 200명, 전입인원수는 100명일 때 10월의 입직률을 계산하시오. (공식 2점 + 답 3점)',
+      isCalc: true,
+      formula: {
+        title: '입직률 공식',
+        main: '입직률 = (신규채용 + 전입인원) ÷ 전월말 총근로자수 × 100',
+        calc: '= (200 + 100) ÷ 2,000 × 100',
+        result: '= 15%'
+      }
+    },
+  ],
+
+  r2: [
+    {
+      n: 1, score: 6, tags: ['신출 25-2년'],
+      q: '집단역동 요소 6가지 쓰시오.',
+      simple: ['① 응집력', '② 상호작용', '③ 규범', '④ 역할', '⑤ 의사결정', '⑥ 지도력'],
+      isNew: true
+    },
+    {
+      n: 2, score: 4, tags: ['10개년★'],
+      q: '윌리암슨의 변별진단 4가지를 쓰시오.',
+      simple: ['① 직업 무선택', '② 불확실한 선택', '③ 어리석은 선택', '④ 흥미와 적성의 불일치']
+    },
+    {
+      n: 3, score: 6, tags: ['25-2, 19-1년'],
+      q: '특성-요인 상담 과정을 설명하시오.',
+      ans: [
+        { key: '① 분석', desc: '내담자에 관한 자료 수집' },
+        { key: '② 종합', desc: '내담자에 관한 정보를 종합' },
+        { key: '③ 진단', desc: '문제의 원인을 탐색하고 해결방법을 검토' },
+        { key: '④ 예측', desc: '문제에 대한 대안을 예측' },
+        { key: '⑤ 상담', desc: '직업문제에 대해 상담하고 문제를 치료' },
+        { key: '⑥ 추수지도', desc: '바람직한 행동을 하도록 계속적인 지도' },
+      ]
+    },
+    {
+      n: 4, score: 6, tags: ['4개년★'],
+      q: '수퍼(Super)가 제시한 3가지 평가를 쓰고 설명하시오.',
+      ans: [
+        { key: '① 문제평가', desc: '내담자의 어려움과 상담 기대 평가' },
+        { key: '② 개인평가', desc: '심리검사와 사례연구로 내담자 상태 분석' },
+        { key: '③ 예언평가', desc: '내담자의 직업 만족도 예측' },
+      ]
+    },
+    {
+      n: 5, score: 6, tags: ['11개년★'],
+      q: '생애진로사정(LCA)으로 얻을 수 있는 정보 3가지 쓰시오.',
+      ans: [
+        { key: '① 직업경험·교육수준', desc: '내담자의 직업경험과 교육수준' },
+        { key: '② 기술·유능성 평가', desc: '내담자의 기술과 유능성에 대한 자기평가, 상담자평가' },
+        { key: '③ 가치관·자기인식', desc: '내담자의 가치관, 자기 인식 정도' },
+      ]
+    },
+    {
+      n: 6, score: 5, tags: ['4개년★'],
+      q: '성격의 5요인을 쓰시오.',
+      simple: ['① 외향성', '② 호감성', '③ 성실성', '④ 정서적 불안정성', '⑤ 경험에 대한 개방성']
+    },
+    {
+      n: 7, score: 6, tags: ['13개년★'],
+      q: '홀랜드(Holland)의 인성이론에서 제안한 성격이론 6가지 유형을 쓰고 설명하시오.',
+      ans: [
+        { key: 'R 현실형', desc: '기계조작 선호 — 농부, 기술자, 비행기 조종사' },
+        { key: 'I 탐구형', desc: '관찰, 연구 선호 — 과학자, 연구원' },
+        { key: 'A 예술형', desc: '창조적, 자유로움 — 예술가, 연예인' },
+        { key: 'S 사회형', desc: '사람 응대에 능숙 — 교사, 상담가' },
+        { key: 'E 진취형', desc: '리더십, 목표의식 — 정치가, 사업가' },
+        { key: 'C 관습형', desc: '체계적, 질서정연함 — 공무원, 은행원' },
+      ]
+    },
+    {
+      n: 8, score: 6, tags: ['신출 25-2년'],
+      q: '하렌의 의사결정 3가지 설명하시오.',
+      ans: [
+        { key: '① 합리적 유형', desc: '의사결정에 대해 논리적이고 체계적으로 접근' },
+        { key: '② 직관적 유형', desc: '즉각적인 느낌과 감정에 따라 결정하는 유형' },
+        { key: '③ 의존적 유형', desc: '개인적 책임을 부정하고 외부로 책임을 돌리는 경향이 높은 유형' },
+      ],
+      isNew: true
+    },
+    {
+      n: 9, score: 4, tags: ['5개년★'],
+      q: '부정적인 심리검사 결과가 나온 내담자에게 검사 결과를 통보하는 방법 4가지를 쓰시오.',
+      ans: [
+        { key: '① 충격 최소화', desc: '내담자가 검사결과에 충격을 받지 않도록 주의한다.' },
+        { key: '② 적절한 해석 제공', desc: '적절한 해석을 담은 설명과 함께 전달한다.' },
+        { key: '③ 방어 최소화', desc: '내담자의 방어를 최소화하기 위해 노력한다.' },
+        { key: '④ 평이한 용어 사용', desc: '어려운 용어 사용을 피하고, 일상적인 용어를 사용한다.' },
+      ]
+    },
+    {
+      n: 10, score: 6, tags: ['15개년★'],
+      q: '집단 내 규준의 종류 3가지를 쓰고 설명하시오.',
+      ans: [
+        { key: '① 백분위점수', desc: '표준화된 집단의 점수분포에서 한 개인의 상대적 위치를 나타내는 것' },
+        { key: '② 표준점수', desc: '표준편차를 사용하여 개인의 점수가 평균으로부터 떨어진 거리를 표시한 것' },
+        { key: '③ 표준등급', desc: '원점수를 1~9까지의 구간으로 구분하여 각 구간마다 등급을 부여한 것' },
+      ]
+    },
+    {
+      n: 11, score: 6, tags: ['5개년★'],
+      q: '측정오차를 줄이는 방법 6가지 쓰시오.',
+      simple: ['① 표준화된 검사 사용', '② 검사 실시 및 채점 방식 표준화', '③ 적절한 표본 추출 및 측정', '④ 검사 문항 수 증가', '⑤ 신뢰도에 나쁜 영향 문항 제거', '⑥ 균일한 검사 조건 유지']
+    },
+    {
+      n: 12, score: 4, tags: ['9개년★'],
+      q: '검사 재검사 신뢰도에 영향을 미치는 요인 4가지를 쓰시오.',
+      simple: ['① 이월효과', '② 성숙효과', '③ 반응민감성', '④ 환경상의 변화', '(+시간 및 비용 소요)']
+    },
+    {
+      n: 13, score: 6, tags: ['신출, 22-1년 변형'],
+      q: '민간직업정보 특징을 3가지 쓰시오.',
+      ans: [
+        { key: '① 자의성', desc: '생산자의 자의성에 따라 구분한다.' },
+        { key: '② 선택성', desc: '특정한 목적에 따라 제한적으로 선택한다.' },
+        { key: '③ 유료 제공', desc: '유료로 제공된다.' },
+      ],
+      isNew: true
+    },
+    {
+      n: 14, score: 6, tags: ['10개년★'],
+      q: '한국직업사전에 수록된 부가직업정보 6가지를 쓰시오.',
+      simple: ['① 정규교육', '② 육체활동', '③ 숙련기간', '④ 직무기능', '⑤ 작업강도', '⑥ 작업환경']
+    },
+    {
+      n: 15, score: 6, tags: ['10개년★'],
+      q: '한국표준직업분류에서 직업으로 인정되지 않는 활동 6가지를 쓰시오.',
+      simple: ['① 이자 및 임대료', '② 연금법에 의한 수입', '③ 경마·경륜', '④ 예금·적금을 통한 수입', '⑤ 가사 활동', '⑥ 사회복지시설 수용자의 시설 내 경제활동', '(+수형자의 강제노동)']
+    },
+    {
+      n: 16, score: 6, tags: ['4개년★'],
+      q: '한국표준산업에서 주된 산업활동, 부차적 산업활동, 보조적 산업활동을 설명하시오.',
+      ans: [
+        { key: '① 주된 산업활동', desc: '부가가치가 가장 큰 재화나 서비스 제공' },
+        { key: '② 부차적 산업활동', desc: '주된 활동 외 재화나 서비스 제공' },
+        { key: '③ 보조활동', desc: '주된 활동과 부차적 활동을 지원하는 활동' },
+      ]
+    },
+    {
+      n: 17, score: 6, tags: ['13개년★'],
+      q: '노동수요의 탄력성 산출하는 공식과 탄력성에 영향을 미치는 결정적인 요인 4가지를 쓰시오. (공식 2점, 요인 각 1점)',
+      isCalc: true,
+      formula: {
+        title: '노동수요의 임금탄력성 공식',
+        main: '노동수요 임금탄력성 = 노동수요량 변화율(%) ÷ 임금 변화율(%)',
+        calc: '',
+        result: ''
+      },
+      ans: [
+        { key: '결정요인', desc: '① 생산물 수요의 탄력성  ② 총생산비에 대한 노동비용의 비중  ③ 노동의 대체 가능성  ④ 노동 이외 생산요소의 공급 탄력성' }
+      ]
+    },
+    {
+      n: 18, score: 5, tags: ['8개년★'],
+      q: '최저임금제의 기대 효과 5가지를 쓰시오.',
+      simple: ['① 소득분배의 개선', '② 노동력의 질적 향상', '③ 공정경쟁의 확보', '④ 경기 활성화에 기여', '⑤ 기업의 근대화 및 산업구조 고도화 촉진', '(+산업평화의 유지)', '(+복지국가 실현)']
+    },
+  ],
+
+  r3: [
+    {
+      n: 1, score: 6, tags: ['신출 25-3년'],
+      q: 'Tolbert 집단직업상담 핵심요소 6가지를 쓰시오.',
+      simple: ['① 일정', '② 집단 구성', '③ 집단 형태', '④ 과정', '⑤ 평가', '⑥ 리더', '(+목표, 비밀유지)'],
+      isNew: true
+    },
+    {
+      n: 2, score: 6, tags: ['9개년★'],
+      q: '내담자 중심 상담에서 상담자가 갖추어야 할 기본태도 3가지 쓰고 설명하시오.',
+      ans: [
+        { key: '① 일치성과 진실성', desc: '상담자는 진실하고 개방적이어야 한다.' },
+        { key: '② 공감적 이해', desc: '내담자의 내면세계를 자신의 것처럼 이해하고 느낀다.' },
+        { key: '③ 무조건적인 수용', desc: '무조건적이고 긍정적으로 존중한다.' },
+      ]
+    },
+    {
+      n: 3, score: 6, tags: ['6개년★'],
+      q: '벡(Beck)의 인지치료 이론에서 인지적 오류의 유형 6가지 쓰시오.',
+      simple: ['① 임의적 추론', '② 선택적 추상화', '③ 과잉 일반화', '④ 개인화', '⑤ 이분법적 사고', '⑥ 과장 및 축소', '(+잘못된 명명)', '(+긍정 격화)']
+    },
+    {
+      n: 4, score: 6, tags: ['25-3, 18-1년'],
+      q: '특성-요인 직업상담의 3가지 기본원리(기본가정)을 쓰시오.',
+      ans: [
+        { key: '① 고유한 특성', desc: '개인은 고유한 특성을 가지고 있다.' },
+        { key: '② 측정 가능성', desc: '특성은 측정 가능하며 비교 가능하다.' },
+        { key: '③ 조화의 중요성', desc: '특성과 환경의 조화가 중요하고 밀접한 관계가 있을 때 성공가능성이 높아진다.' },
+      ]
+    },
+    {
+      n: 5, score: 6, tags: ['6개년★'],
+      q: '내담자와 관련된 정보를 수집하고 내담자의 행동을 이해하고 해석하는데 기본이 되는 상담기법 6가지를 쓰시오.',
+      simple: ['① 저항감 재인식하기 및 다루기', '② 분류 및 재구성', '③ 의미 있는 질문 사용', '④ 변명에 초점 맞추기', '⑤ 왜곡된 사고 확인하기', '⑥ 근거 없는 믿음 확인하기', '(+가정 사용하기)', '(+전이된 오류 정정하기)']
+    },
+    {
+      n: 6, score: 6, tags: ['25-3, 24-1, 22-3년'],
+      q: '직업적응이론(TWA)에서 중요하게 생각하는 직업가치 6가지를 쓰시오.',
+      simple: ['① 지위', '② 성취', '③ 이타심', '④ 안정감', '⑤ 안락함', '⑥ 자율성']
+    },
+    {
+      n: 7, score: 6, tags: ['6개년★'],
+      q: '스트롱 직업흥미검사의 하위척도 3가지를 쓰고 간략히 설명하시오.',
+      ans: [
+        { key: '① 일반직업분류(GOT)', desc: '홀랜드의 6가지 직업 흥미 유형을 측정' },
+        { key: '② 기본흥미척도(BIS)', desc: '30개 직업군의 특정 주제나 개인의 흥미를 측정하는 척도' },
+        { key: '③ 개인특성척도(PSS)', desc: '업무, 학습, 리더십, 모험심, 팀 지향 유형들에 대한 개인의 선호도 측정' },
+      ]
+    },
+    {
+      n: 8, score: 6, tags: ['6개년★'],
+      q: '진로성숙도검사(CMI)의 능력척도를 3가지 쓰고, 설명하시오.',
+      ans: [
+        { key: '① 자기평가', desc: '성격, 흥미 등을 파악하는 정도' },
+        { key: '② 직업정보', desc: '직업 지식과 정보를 획득하는 능력' },
+        { key: '③ 목표선정', desc: '합리적인 직업을 선택하는 능력' },
+      ]
+    },
+    {
+      n: 9, score: 4, tags: ['25-3, 14-2, 11-2, 8-2년'],
+      q: '심리검사의 점수가 분산되어 있는 정도를 판단하기 위해 사용하는 기준 2가지를 쓰고 설명하시오.',
+      ans: [
+        { key: '① 범위', desc: '최고점수에서 최저점수 간의 거리' },
+        { key: '② 표준편차', desc: '정규분포상에서 평균으로부터 평균적으로 떨어진 거리' },
+      ]
+    },
+    {
+      n: 10, score: 6, tags: ['10개년★'],
+      q: '규준 제작 시 사용되는 확률표집방법의 종류 3가지를 쓰고 설명하시오.',
+      ans: [
+        { key: '① 단순무선표집', desc: '무작위 표집' },
+        { key: '② 층화표집', desc: '이질적인 하위 집단에 사용 (종파별 표집)' },
+        { key: '③ 군집표집', desc: '동일한 하위집단 사용 (1학년 반별 표집)' },
+      ]
+    },
+    {
+      n: 11, score: 4, tags: ['9개년★'],
+      q: '검사-재검사 신뢰도의 단점 4가지를 쓰시오.',
+      simple: ['① 이월효과', '② 성숙효과', '③ 반응민감성', '④ 환경상의 변화', '(+시간 및 비용 소요)']
+    },
+    {
+      n: 12, score: 4, tags: ['12개년★'],
+      q: '구성타당도의 유형에 속하는 타당도를 2가지 쓰고, 각각에 대하여 설명하시오.',
+      ans: [
+        { key: '① 수렴타당도', desc: '검사결과가 해당 속성과 관련 있는 변수들과 높은 상관관계를 가지고 있을수록 수렴타당도가 높다.' },
+        { key: '② 변별타당도', desc: '검사가 관련 없는 변수들과 낮은 상관관계를 가지고 있을수록 변별타당도가 높다.' },
+      ]
+    },
+    {
+      n: 13, score: 4, tags: ['25-3, 22-1년'],
+      q: '공공 직업정보의 특성을 4가지 쓰시오.',
+      simple: ['① 전체 산업 및 직종을 대상으로 한다', '② 공익적인 목적으로 공공적으로 생산·제공된다', '③ 지속적으로 조사·분석하여 제공 (장기계획)', '④ 무료로 제공되며, 정부 및 공공기관 주도로 생산']
+    },
+    {
+      n: 14, score: 6, tags: ['신출 25-3년'],
+      q: '직업정보의 가공 시 유의사항 5가지를 쓰시오.',
+      ans: [
+        { key: '① 수준 맞는 언어', desc: '이용자의 수준에 맞는 언어로 가공한다.' },
+        { key: '② 편견 없는 제공', desc: '직업에 대한 장단점을 편견 없이 제공한다.' },
+        { key: '③ 최신·표준화 자료', desc: '가장 최신 자료를 활용하되 표준화된 정보를 활용한다.' },
+        { key: '④ 객관성 유지', desc: '객관성이 없는 정보는 활용하지 않는다.' },
+        { key: '⑤ 시청각 효과 활용', desc: '시청각 효과를 통해 이용자가 쉽게 접근할 수 있도록 한다.' },
+      ],
+      isNew: true
+    },
+    {
+      n: 15, score: 6, tags: ['5개년★'],
+      q: '한국표준직업분류에 따라 직능수준을 채우시오.',
+      isTable: true,
+      tableData: {
+        headers: ['직업 대분류', '직능수준'],
+        rows: [
+          ['관리자', '4 또는 3직능 수준'],
+          ['전문가 및 관련 종사자', '4 또는 3직능 수준'],
+          ['사무 종사자', '제2직능 수준'],
+          ['서비스·판매 종사자', '제2직능 수준'],
+          ['농림·어업 숙련 종사자', '제2직능 수준'],
+          ['기능원·기계조작 종사자', '제2직능 수준'],
+          ['단순노무 종사자', '제1직능 수준'],
+          ['군인', '제2직능 수준 이상'],
+        ]
+      }
+    },
+    {
+      n: 16, score: 6, tags: ['신출 25-3년'],
+      q: '한국표준산업분류 11차 개정 3가지 특징을 쓰시오.',
+      ans: [
+        { key: '① 신설·세분', desc: '미래 성장산업 관련 분류항목을 신설·세분' },
+        { key: '② 통합', desc: '상대적으로 비중이 감소한 산업 관련 분류항목 통합' },
+        { key: '③ 현실·국제 반영', desc: '개정 수요 및 국제기준을 반영하여 경제통계의 현실적합성·국제비교성을 높임' },
+      ],
+      isNew: true
+    },
+    {
+      n: 17, score: 6, tags: ['5개년★'],
+      q: '임금상승률에 따라 노동공급 곡선이 우상향한다. 이것이 참인지, 거짓인지, 불확실한지 판정하고, 여가와 소득 선택 모형에 의거하여 그 이유를 설명하시오.',
+      ans: [
+        { key: '판정', desc: '불확실하다.' },
+        { key: '이유', desc: '임금률의 상승에 따른 노동공급곡선에는 소득효과와 대체효과가 존재하기 때문이다.' },
+        { key: '상세', desc: '여가가 정상재인 경우: 대체효과 > 소득효과 → 우상향 / 대체효과 < 소득효과 → 후방굴절\n여가가 열등재인 경우: 소득효과·대체효과에 관계없이 우상향' },
+      ]
+    },
+    {
+      n: 18, score: 6, tags: ['계산문제'],
+      q: '아래 표를 보고 물음에 답하시오.\n[총인구: 2,000명 / 15세이상: 1,000명 / 취업자: 450명 / 실업자: 50명]\n1) 경제활동 참여율  2) 고용률  3) 실업률',
+      isCalc: true,
+      multiFormula: [
+        { title: '① 경제활동 참여율', main: '경제활동인구(450+50) ÷ 15세이상인구(1,000) × 100', result: '= 50%' },
+        { title: '② 고용률', main: '취업자수(450) ÷ 15세이상인구(1,000) × 100', result: '= 45%' },
+        { title: '③ 실업률', main: '실업자수(50) ÷ 경제활동인구(500) × 100', result: '= 10%' },
+      ]
+    },
+  ]
+};
+
+/* ────────────────────────── RENDER ────────────────────────── */
+function renderCard(q, prefix) {
+  const id = `${prefix}-${q.n}`;
+  let tagsHtml = '';
+  if (q.isNew) tagsHtml += `<span class="tag tag-new">🆕 신출</span> `;
+  if (q.tags) {
+    const freq = q.tags.find(t => t.includes('개년') || t.includes('★'));
+    const year = q.tags.find(t => !t.includes('개년') && !t.includes('★'));
+    if (freq) tagsHtml += `<span class="tag tag-freq">${freq}</span> `;
+    if (year) tagsHtml += `<span class="tag tag-year">${year}</span> `;
+  }
+  tagsHtml += `<span class="tag tag-score">${q.score}점</span>`;
+
+  let ansHtml = '<div class="ans-label">✦ 모범답안</div>';
+
+  // 계산 공식
+  if (q.formula) {
+    ansHtml += `<div class="formula-box">
+      <div class="f-title">📐 ${q.formula.title}</div>
+      <div class="f-main">${q.formula.main}</div>
+      ${q.formula.calc ? `<div class="f-main" style="color:#ffeaa7;margin-top:4px">${q.formula.calc}</div>` : ''}
+      ${q.formula.result ? `<div class="f-result">${q.formula.result}</div>` : ''}
+    </div>`;
+  }
+  if (q.multiFormula) {
+    q.multiFormula.forEach(f => {
+      ansHtml += `<div class="formula-box">
+        <div class="f-title">📐 ${f.title}</div>
+        <div class="f-main">${f.main}</div>
+        <div class="f-result">${f.result}</div>
+      </div>`;
+    });
+  }
+
+  // 서술형 답안
+  if (q.ans) {
+    q.ans.forEach(a => {
+      ansHtml += `<div class="ans-item">
+        <div class="key">${a.key}</div>
+        <div class="desc">${a.desc.replace(/\n/g, '<br>')}</div>
+      </div>`;
+    });
+  }
+
+  // 단순 목록
+  if (q.simple) {
+    const cols = q.simple.length <= 3 ? 'col1' : '';
+    ansHtml += `<div class="ans-simple ${cols}">`;
+    q.simple.forEach(s => {
+      const isSub = s.startsWith('(+');
+      ansHtml += `<div class="item" style="${isSub ? 'opacity:0.65;font-size:13px;border-style:dashed' : ''}">${s}</div>`;
+    });
+    ansHtml += '</div>';
+  }
+
+  // 표
+  if (q.isTable && q.tableData) {
+    ansHtml += `<div class="tbl-wrap"><table>
+      <thead><tr>${q.tableData.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${q.tableData.rows.map(r => `<tr>${r.map((c, i) => `<td class="${i === 1 ? 'td-hl' : ''}">${c}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table></div>`;
+  }
+
+  return `
+  <div class="q-card" id="card-${id}">
+    <div class="q-head" onclick="toggleCard('${id}')">
+      <div class="q-num">${q.n}</div>
+      <div class="q-body">
+        <div class="q-tags">${tagsHtml}</div>
+        <div class="q-text">${q.q.replace(/\n/g, '<br>')}</div>
+      </div>
+      <div class="toggle-icon">⌄</div>
+    </div>
+    <div class="ans-area">${ansHtml}</div>
+  </div>`;
+}
+
+function renderAll() {
+  ['r1', 'r2', 'r3'].forEach(key => {
+    // 개별 탭
+    document.getElementById(`list-${key}`).innerHTML = DATA[key].map(q => renderCard(q, key)).join('');
+    // 전체 탭
+    document.getElementById(`list-all-${key}`).innerHTML = DATA[key].map(q => renderCard(q, `all-${key}`)).join('');
+  });
+}
+
+/* ────────────────────────── TOGGLE ────────────────────────── */
+function toggleCard(id) {
+  const card = document.getElementById(`card-${id}`);
+  card.classList.toggle('open');
+}
+
+function expandAll(scope) {
+  const prefix = scope === 'all' ? ['all-r1', 'all-r2', 'all-r3'] : [scope];
+  prefix.forEach(p => {
+    DATA[p.replace('all-', '')].forEach(q => {
+      const card = document.getElementById(`card-${p}-${q.n}`);
+      if (card) card.classList.add('open');
+    });
+  });
+}
+
+function collapseAll(scope) {
+  const prefix = scope === 'all' ? ['all-r1', 'all-r2', 'all-r3'] : [scope];
+  prefix.forEach(p => {
+    DATA[p.replace('all-', '')].forEach(q => {
+      const card = document.getElementById(`card-${p}-${q.n}`);
+      if (card) card.classList.remove('open');
+    });
+  });
+}
+
+/* ────────────────────────── TAB ────────────────────────── */
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+/* init */
+renderAll();
+</script>
+</body>
+</html>

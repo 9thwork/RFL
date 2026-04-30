@@ -663,14 +663,14 @@ ${altLang==='en'?'- 영어로만 생성':''}
     }]
   };
 
+  const payload = { ...body, _apiKey: getKey() };
+
   const headers = {
-    'Content-Type': 'application/json',
-    'x-api-key': getKey(),
-    'anthropic-version': '2023-06-01'
+    'Content-Type': 'application/json'
   };
 
   let res = await fetch('https://aeo-proxy.cord1105.workers.dev/', {
-    method:'POST', headers, body: JSON.stringify(body)
+    method:'POST', headers, body: JSON.stringify(payload)
   });
 
   if (!res.ok) {

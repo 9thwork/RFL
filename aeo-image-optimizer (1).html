@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEO Image Optimizer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg:       #f5f4f0;
+  --surface:  #ffffff;
+  --surface2: #eeecea;
+  --border:   #d8d5d0;
+  --border2:  #c8c4be;
+  --ink:      #1a1816;
+  --ink2:     #5a5650;
+  --ink3:     #9a9690;
+  --accent:   #d4521a;
+  --accent2:  #1a6dd4;
+  --success:  #1a9450;
+  --warn:     #c4820a;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'Noto Sans KR', sans-serif;
+  --radius:   6px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.app {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: 56px 1fr;
+  grid-template-areas:
+    "topbar topbar"
+    "sidebar main";
+  min-height: 100vh;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  grid-area: topbar;
+  background: var(--ink);
+  color: #f5f4f0;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  border-bottom: 2px solid var(--accent);
+}
+
+.logo {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-tag {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.1em;
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.api-status {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #9a9690;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.api-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #555;
+}
+.api-dot.ok { background: #34d399; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  grid-area: sidebar;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 0 0 40px;
+}
+
+.sidebar-section {
+  border-bottom: 1px solid var(--border);
+  padding: 20px;
+}
+
+.sidebar-section:last-child { border-bottom: none; }
+
+.section-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px; height: 12px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* Form elements */
+label.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink2);
+  margin-bottom: 5px;
+  margin-top: 12px;
+}
+
+label.field-label:first-of-type { margin-top: 0; }
+
+input[type=text],
+input[type=password],
+select,
+textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+}
+
+input[type=text]:focus,
+input[type=password]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent2);
+  background: var(--surface);
+}
+
+input[type=password] { font-family: var(--mono); letter-spacing: 0.05em; }
+
+.api-row { display:flex; gap:6px; }
+.api-row input { flex:1; }
+
+textarea { resize: vertical; min-height: 60px; font-size: 12px; }
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface2);
+  color: var(--ink2);
+  user-select: none;
+}
+
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-save {
+  width: 100%;
+  margin-top: 14px;
+  padding: 9px;
+  background: var(--ink);
+  color: #f5f4f0;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-save:hover { background: #333; }
+
+/* ── MAIN ── */
+.main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Drop zone */
+.dropzone {
+  border: 2px dashed var(--border2);
+  border-radius: 10px;
+  margin: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+  position: relative;
+}
+
+.dropzone:hover,
+.dropzone.drag-over {
+  border-color: var(--accent);
+  background: #fff8f5;
+}
+
+.drop-icon { font-size: 36px; margin-bottom: 10px; display: block; }
+.drop-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+.drop-sub { font-size: 12px; color: var(--ink3); }
+.drop-formats {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.fmt-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  color: var(--ink3);
+}
+#fileInput { display: none; }
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px 16px;
+  flex-wrap: wrap;
+}
+
+.item-count {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink3);
+  margin-right: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.btn-run {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-run:hover { background: #c04010; }
+.btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-dl {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+.btn-dl:hover { background: #157a3e; }
+.btn-dl:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--ink2);
+  border-color: var(--border2);
+}
+.btn-outline:hover { border-color: var(--ink2); color: var(--ink); }
+
+/* Progress */
+.progress-wrap {
+  padding: 0 24px 12px;
+  display: none;
+}
+.progress-wrap.visible { display: block; }
+.progress-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.progress-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+/* Queue table */
+.queue-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px 24px;
+}
+
+.queue-empty {
+  text-align: center;
+  color: var(--ink3);
+  font-size: 13px;
+  padding: 40px;
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.queue-table th {
+  background: var(--surface2);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.queue-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.queue-table tr:last-child td { border-bottom: none; }
+
+.queue-table tr.processing { background: #fff8f5; }
+.queue-table tr.done { background: #f5fbf7; }
+.queue-table tr.error { background: #fff5f5; }
+
+.thumb {
+  width: 44px; height: 44px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  display: block;
+}
+
+.fname-orig {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+  word-break: break-all;
+  max-width: 180px;
+}
+
+.fname-new {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent2);
+  word-break: break-all;
+  max-width: 220px;
+}
+
+.alt-cell {
+  font-size: 12px;
+  color: var(--ink2);
+  max-width: 260px;
+  line-height: 1.4;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.status-badge.idle    { background: var(--surface2); color: var(--ink3); }
+.status-badge.loading { background: #fff3e0; color: var(--warn); }
+.status-badge.done    { background: #e8f8ee; color: var(--success); }
+.status-badge.error   { background: #fee; color: #c0392b; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin 0.8s linear infinite; }
+
+.btn-del {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 26px; height: 26px;
+  cursor: pointer;
+  color: var(--ink3);
+  font-size: 13px;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-del:hover { border-color: #e74c3c; color: #e74c3c; }
+
+/* Detail expand */
+.detail-row td {
+  padding: 0 14px;
+  background: var(--surface2);
+}
+.detail-inner {
+  padding: 12px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.detail-block { }
+.detail-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.detail-val {
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.detail-val span { flex: 1; word-break: break-all; }
+.copy-mini {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink3);
+  font-size: 13px;
+  padding: 0 2px;
+  transition: color 0.15s;
+}
+.copy-mini:hover { color: var(--accent2); }
+
+/* Result panel */
+.result-panel {
+  margin: 0 24px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: none;
+}
+.result-panel.visible { display: block; }
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.result-title {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--success);
+}
+.result-actions { display: flex; gap: 8px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  background: var(--ink);
+  color: #f5f4f0;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  z-index: 9999;
+  transform: translateY(60px);
+  opacity: 0;
+  transition: all 0.25s;
+  pointer-events: none;
+  max-width: 320px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok  { background: var(--success); }
+.toast.err { background: #c0392b; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── TOPBAR ── -->
+  <header class="topbar">
+    <div class="logo">
+      AEO Image Optimizer
+      <span class="logo-tag">BETA</span>
+    </div>
+    <div class="topbar-right">
+      <div class="api-status">
+        <div class="api-dot" id="apiDot"></div>
+        <span id="apiStatusText">API 키 없음</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+
+    <!-- API Key -->
+    <div class="sidebar-section">
+      <div class="section-title">API 설정</div>
+      <label class="field-label">Anthropic API Key</label>
+      <div class="api-row">
+        <input type="password" id="apiKey" placeholder="sk-ant-api03-..." oninput="checkKey()" />
+      </div>
+      <div style="font-size:10px; color:var(--ink3); margin-top:6px; font-family:var(--mono);">
+        브라우저 내 저장 · 외부 전송 없음
+      </div>
+      <button class="btn-save" onclick="saveKey()">저장 및 적용</button>
+    </div>
+
+    <!-- 플랫폼 -->
+    <div class="sidebar-section">
+      <div class="section-title">플랫폼</div>
+      <div class="chip-group" id="platformGroup">
+        <div class="chip active" data-val="coupang">쿠팡</div>
+        <div class="chip" data-val="naver">스마트스토어</div>
+        <div class="chip" data-val="11st">11번가</div>
+        <div class="chip" data-val="gmarket">G마켓</div>
+        <div class="chip" data-val="auction">옥션</div>
+        <div class="chip" data-val="zigzag">지그재그</div>
+        <div class="chip" data-val="musinsa">무신사</div>
+        <div class="chip" data-val="general">공통/기타</div>
+      </div>
+    </div>
+
+    <!-- 이미지 용도 -->
+    <div class="sidebar-section">
+      <div class="section-title">이미지 용도</div>
+      <div class="chip-group" id="purposeGroup">
+        <div class="chip active" data-val="thumbnail">대표 썸네일</div>
+        <div class="chip" data-val="detail">상세페이지</div>
+        <div class="chip" data-val="event">이벤트/배너</div>
+        <div class="chip" data-val="brand">브랜드 이미지</div>
+        <div class="chip" data-val="lifestyle">라이프스타일</div>
+        <div class="chip" data-val="size">사이즈/스펙</div>
+      </div>
+    </div>
+
+    <!-- 상품 정보 -->
+    <div class="sidebar-section">
+      <div class="section-title">상품 정보</div>
+      <label class="field-label">카테고리</label>
+      <input type="text" id="category" placeholder="예: 주방용품, 여성의류, 건강식품..." />
+
+      <label class="field-label">브랜드 / 스토어명</label>
+      <input type="text" id="brand" placeholder="예: 삼성, OEM, 자사몰..." />
+
+      <label class="field-label">타겟 키워드 (선택)</label>
+      <textarea id="keywords" placeholder="예: 무쇠팬 28cm&#10;주물냄비 인덕션&#10;캠핑용 코팅팬"></textarea>
+
+      <label class="field-label">추가 컨텍스트 (선택)</label>
+      <textarea id="context" placeholder="예: 프리미엄 라인, 시즌 한정, 선물용 패키지..."></textarea>
+    </div>
+
+    <!-- 출력 설정 -->
+    <div class="sidebar-section">
+      <div class="section-title">출력 설정</div>
+      <label class="field-label">파일명 언어</label>
+      <select id="fnLang">
+        <option value="en">영어 (SEO 표준)</option>
+        <option value="ko-en">한국어+영어 혼용</option>
+      </select>
+
+      <label class="field-label">Alt 태그 언어</label>
+      <select id="altLang">
+        <option value="ko">한국어</option>
+        <option value="en">영어</option>
+        <option value="both">한국어 + 영어</option>
+      </select>
+
+      <label class="field-label">파일명 구조</label>
+      <select id="fnStructure">
+        <option value="full">[브랜드]-[제품]-[특징]-[색상/크기]</option>
+        <option value="product">[제품]-[특징]-[색상/크기]</option>
+        <option value="purpose">[용도]-[제품]-[특징]</option>
+      </select>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- Drop zone -->
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <span class="drop-icon">📂</span>
+      <div class="drop-title">이미지 파일을 드래그하거나 클릭하여 업로드</div>
+      <div class="drop-sub">상세페이지 · 썸네일 · 이벤트 이미지 · 브랜드 이미지 모두 지원</div>
+      <div class="drop-formats">
+        <span class="fmt-badge">JPG</span>
+        <span class="fmt-badge">PNG</span>
+        <span class="fmt-badge">WEBP</span>
+        <span class="fmt-badge">GIF</span>
+        <span class="fmt-badge">최대 30장</span>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" multiple />
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <span class="item-count" id="itemCount">0개 파일</span>
+      <button class="btn btn-outline" onclick="clearAll()">🗑 초기화</button>
+      <button class="btn btn-run" id="runBtn" onclick="runAll()" disabled>▶ AEO 분석 시작</button>
+      <button class="btn btn-dl" id="dlBtn" onclick="downloadZip()" disabled>⬇ ZIP 다운로드</button>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-label" id="progressLabel">0 / 0 분석 중...</div>
+    </div>
+
+    <!-- Queue -->
+    <div class="queue-wrap">
+      <div class="queue-empty" id="queueEmpty">
+        이미지를 업로드하면 여기에 표시됩니다
+      </div>
+      <table class="queue-table" id="queueTable" style="display:none">
+        <thead>
+          <tr>
+            <th style="width:56px">미리보기</th>
+            <th>원본 파일명</th>
+            <th>AEO 파일명</th>
+            <th>Alt 태그</th>
+            <th style="width:90px">상태</th>
+            <th style="width:36px"></th>
+          </tr>
+        </thead>
+        <tbody id="queueBody"></tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+const state = {
+  items: [],      // {id, file, previewUrl, status, result}
+  running: false,
+  zipReady: false
+};
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const k = localStorage.getItem('aeo_api_key');
+  if (k) { document.getElementById('apiKey').value = k; updateApiStatus(true); }
+
+  // chip groups — single select
+  ['platformGroup','purposeGroup'].forEach(gId => {
+    document.getElementById(gId).addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.querySelectorAll(`#${gId} .chip`).forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+});
+
+// ════════════════════════════════════════════
+//  API KEY
+// ════════════════════════════════════════════
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k) return toast('API 키를 입력하세요', 'err');
+  localStorage.setItem('aeo_api_key', k);
+  updateApiStatus(true);
+  toast('API 키 저장됨', 'ok');
+}
+
+function checkKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  updateApiStatus(k.length > 20);
+}
+
+function updateApiStatus(ok) {
+  document.getElementById('apiDot').className = 'api-dot' + (ok ? ' ok' : '');
+  document.getElementById('apiStatusText').textContent = ok ? 'API 연결됨' : 'API 키 없음';
+}
+
+function getKey() {
+  return document.getElementById('apiKey').value.trim()
+      || localStorage.getItem('aeo_api_key') || '';
+}
+
+// ════════════════════════════════════════════
+//  DRAG & DROP
+// ════════════════════════════════════════════
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  addFiles([...e.dataTransfer.files]);
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+  addFiles([...e.target.files]); e.target.value = '';
+});
+
+function addFiles(files) {
+  const imgs = files.filter(f => f.type.startsWith('image/'));
+  if (!imgs.length) return toast('이미지 파일만 업로드 가능합니다', 'err');
+  if (state.items.length + imgs.length > 30)
+    return toast('최대 30장까지 업로드 가능합니다', 'err');
+
+  imgs.forEach(file => {
+    const id = crypto.randomUUID ? crypto.randomUUID() : (Date.now() + Math.random()).toString(36);
+    state.items.push({ id, file, previewUrl: URL.createObjectURL(file), status: 'idle', result: null });
+  });
+
+  renderTable();
+  updateToolbar();
+}
+
+// ════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════
+function renderTable() {
+  const tbody = document.getElementById('queueBody');
+  document.getElementById('queueEmpty').style.display = state.items.length ? 'none' : 'block';
+  document.getElementById('queueTable').style.display = state.items.length ? 'table' : 'none';
+
+  tbody.innerHTML = '';
+  state.items.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.id = 'row-' + item.id;
+    tr.className = item.status;
+    tr.innerHTML = rowHTML(item);
+    tbody.appendChild(tr);
+
+    // detail row (hidden)
+    if (item.result) {
+      const dr = document.createElement('tr');
+      dr.className = 'detail-row';
+      dr.id = 'detail-' + item.id;
+      dr.innerHTML = `<td colspan="6"><div class="detail-inner">${detailHTML(item.result)}</div></td>`;
+      tbody.appendChild(dr);
+    }
+  });
+}
+
+function rowHTML(item) {
+  const fname = item.file.name;
+  const newName = item.result ? item.result.filename : '—';
+  const alt = item.result ? (item.result.alt || '—') : '—';
+  const statusBadge = {
+    idle:       '<span class="status-badge idle">대기</span>',
+    processing: '<span class="status-badge loading"><span class="spin">⟳</span> 분석 중</span>',
+    done:       '<span class="status-badge done">✓ 완료</span>',
+    error:      '<span class="status-badge error">✗ 오류</span>',
+  }[item.status] || '';
+
+  return `
+    <td><img class="thumb" src="${item.previewUrl}" /></td>
+    <td><div class="fname-orig">${fname}</div></td>
+    <td><div class="fname-new">${newName}</div></td>
+    <td><div class="alt-cell">${alt.length > 60 ? alt.slice(0,60)+'…' : alt}</div></td>
+    <td>${statusBadge}</td>
+    <td><button class="btn-del" onclick="removeItem('${item.id}')">✕</button></td>
+  `;
+}
+
+function detailHTML(r) {
+  const fields = [
+    { label: 'AEO 파일명', val: r.filename },
+    { label: 'Alt 태그 (KO)', val: r.alt },
+    r.alt_en ? { label: 'Alt tag (EN)', val: r.alt_en } : null,
+    { label: '키워드', val: r.keywords.join(', ') },
+    { label: '상품 설명', val: r.description },
+  ].filter(Boolean);
+
+  return fields.map(f => `
+    <div class="detail-block">
+      <div class="detail-label">${f.label}</div>
+      <div class="detail-val">
+        <span>${f.val}</span>
+        <button class="copy-mini" onclick="copyTxt(\`${f.val.replace(/`/g,'\\`')}\`)" title="복사">⎘</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateRow(item) {
+  const tr = document.getElementById('row-' + item.id);
+  if (!tr) return;
+  tr.className = item.status;
+  tr.innerHTML = rowHTML(item);
+
+  // upsert detail row
+  let dr = document.getElementById('detail-' + item.id);
+  if (item.result) {
+    if (!dr) {
+      dr = document.createElement('tr');
+      dr.className = 'detail-row';
+      dr.id = 'detail-' + item.id;
+      tr.after(dr);
+    }
+    dr.innerHTML = `<td colspan="6"><div class="detail-inner">${detailHTML(item.result)}</div></td>`;
+  }
+}
+
+function updateToolbar() {
+  const n = state.items.length;
+  document.getElementById('itemCount').textContent = `${n}개 파일`;
+  document.getElementById('runBtn').disabled = n === 0 || state.running;
+  const doneCount = state.items.filter(i => i.status === 'done').length;
+  document.getElementById('dlBtn').disabled = doneCount === 0;
+}
+
+function removeItem(id) {
+  state.items = state.items.filter(i => i.id !== id);
+  renderTable(); updateToolbar();
+}
+
+function clearAll() {
+  state.items = [];
+  renderTable(); updateToolbar();
+  document.getElementById('progressWrap').classList.remove('visible');
+}
+
+// ════════════════════════════════════════════
+//  ANALYZE
+// ════════════════════════════════════════════
+async function runAll() {
+  if (!getKey()) return toast('API 키를 먼저 저장하세요', 'err');
+  if (state.running) return;
+
+  const pending = state.items.filter(i => i.status === 'idle' || i.status === 'error');
+  if (!pending.length) return toast('분석할 파일이 없습니다');
+
+  state.running = true;
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('progressWrap').classList.add('visible');
+
+  let done = 0;
+  const total = pending.length;
+  setProgress(0, total);
+
+  for (const item of pending) {
+    item.status = 'processing';
+    updateRow(item);
+
+    try {
+      item.result = await analyzeOne(item);
+      item.status = 'done';
+    } catch(e) {
+      item.status = 'error';
+      console.error(e);
+      toast(`[${item.file.name}] ${e.message}`, 'err');
+    }
+
+    done++;
+    setProgress(done, total);
+    updateRow(item);
+    updateToolbar();
+  }
+
+  state.running = false;
+  document.getElementById('runBtn').disabled = false;
+  toast(`완료: ${done}/${total}`, 'ok');
+}
+
+function setProgress(done, total) {
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done} / ${total} 분석 완료`;
+}
+
+async function analyzeOne(item) {
+  const base64 = await toBase64(item.file);
+  const mtype = item.file.type || 'image/jpeg';
+
+  // Settings
+  const platform = document.querySelector('#platformGroup .chip.active')?.dataset.val || 'general';
+  const purpose  = document.querySelector('#purposeGroup .chip.active')?.dataset.val || 'thumbnail';
+  const category = document.getElementById('category').value.trim();
+  const brand    = document.getElementById('brand').value.trim();
+  const kwInput  = document.getElementById('keywords').value.trim();
+  const ctxInput = document.getElementById('context').value.trim();
+  const fnLang   = document.getElementById('fnLang').value;
+  const altLang  = document.getElementById('altLang').value;
+  const fnStruct = document.getElementById('fnStructure').value;
+
+  const platformMap = {
+    coupang:'쿠팡', naver:'네이버 스마트스토어', '11st':'11번가',
+    gmarket:'G마켓', auction:'옥션', zigzag:'지그재그',
+    musinsa:'무신사', general:'공통'
+  };
+  const purposeMap = {
+    thumbnail:'대표 썸네일', detail:'상세페이지', event:'이벤트/배너',
+    brand:'브랜드 이미지', lifestyle:'라이프스타일', size:'사이즈/스펙 이미지'
+  };
+  const fnStructMap = {
+    full: '[브랜드]-[제품타입]-[핵심특징]-[색상/크기]',
+    product: '[제품타입]-[핵심특징]-[색상/크기]',
+    purpose: '[용도구분]-[제품타입]-[핵심특징]'
+  };
+
+  const needAltEn  = altLang === 'en' || altLang === 'both';
+  const needAltKo  = altLang === 'ko' || altLang === 'both';
+  const fnLangNote = fnLang === 'en'
+    ? '파일명은 반드시 소문자 영어와 하이픈만 사용하세요.'
+    : '파일명은 주요 키워드는 영어, 브랜드/제품명은 한국어 로마자 표기를 혼용해도 됩니다. 단 공백 없이 하이픈으로 연결하세요.';
+
+  const ext = item.file.name.split('.').pop()?.toLowerCase() || 'jpg';
+
+  const system = `당신은 이커머스 AEO(Answer Engine Optimization) 전문가입니다.
+이미지를 분석하여 AI 쇼핑 에이전트, 음성 검색, 시맨틱 검색 엔진이 상품을 정확히 인식할 수 있도록 최적화된 메타데이터를 생성합니다.
+
+[컨텍스트]
+- 플랫폼: ${platformMap[platform]}
+- 이미지 용도: ${purposeMap[purpose]}
+${category ? `- 카테고리: ${category}` : ''}
+${brand    ? `- 브랜드/스토어: ${brand}` : ''}
+${kwInput  ? `- 타겟 키워드: ${kwInput}` : ''}
+${ctxInput ? `- 추가 컨텍스트: ${ctxInput}` : ''}
+
+[파일명 규칙]
+- 구조: ${fnStructMap[fnStruct]}
+- ${fnLangNote}
+- 확장자: .${ext}
+- 최대 80자
+- 좋은 예: samsung-ceramic-pan-28cm-black.${ext}
+- 나쁜 예: IMG_20240315.${ext} / 상품이미지1.${ext} / product(1).${ext}
+
+[Alt 태그 규칙]
+- AI/스크린리더가 상품을 완전히 이해할 수 있도록 작성
+- 포함 요소: 상품 유형, 소재/특징, 색상, 크기, 용도, 타겟
+- 15~30단어의 자연스러운 문장 (키워드 나열 금지)
+${purpose === 'detail' ? '- 상세페이지이므로 기능/효능/사용법 맥락도 포함' : ''}
+${purpose === 'event'  ? '- 이벤트/프로모션 맥락 및 혜택 내용도 반영' : ''}
+
+[출력 형식]
+반드시 JSON만 출력. 마크다운 코드블록 없이 순수 JSON:
+{
+  "filename": "파일명.${ext}",
+  "alt": "${needAltKo ? 'Korean alt tag' : '(생략 가능)'}",
+  ${needAltEn ? '"alt_en": "English alt tag",' : ''}
+  "keywords": ["kw1","kw2","kw3","kw4","kw5"],
+  "description": "AI 쇼핑 에이전트용 핵심 상품 설명 (50자 이내)"
+}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': getKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      system,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mtype, data: base64 } },
+          { type: 'text', text: `원본 파일명: ${item.file.name}\n이 이미지를 분석하고 JSON 메타데이터를 생성해주세요.` }
+        ]
+      }]
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const raw = data.content.map(c => c.text || '').join('').replace(/```json|```/g,'').trim();
+  const parsed = JSON.parse(raw);
+
+  // ensure ext
+  if (!parsed.filename.toLowerCase().endsWith('.' + ext))
+    parsed.filename = parsed.filename.replace(/\.[^.]+$/, '') + '.' + ext;
+
+  // clean up alt_en if not needed
+  if (!needAltEn) delete parsed.alt_en;
+  if (altLang === 'en') { parsed.alt = parsed.alt_en; delete parsed.alt_en; }
+
+  return parsed;
+}
+
+// ════════════════════════════════════════════
+//  ZIP DOWNLOAD
+// ════════════════════════════════════════════
+async function downloadZip() {
+  const done = state.items.filter(i => i.status === 'done');
+  if (!done.length) return toast('완료된 항목이 없습니다', 'err');
+
+  toast('ZIP 생성 중...');
+  const zip = new JSZip();
+  const imgFolder = zip.folder('images');
+  const metaRows = ['원본파일명,AEO파일명,Alt태그,키워드,상품설명'];
+
+  for (const item of done) {
+    try {
+      const ab = await item.file.arrayBuffer();
+      imgFolder.file(item.result.filename, ab);
+      metaRows.push([
+        item.file.name,
+        item.result.filename,
+        item.result.alt || '',
+        item.result.keywords.join('|'),
+        item.result.description || ''
+      ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+    } catch(e) { console.error(e); }
+  }
+
+  // CSV metadata
+  zip.file('aeo-metadata.csv', '\ufeff' + metaRows.join('\n'));
+
+  // JSON metadata
+  zip.file('aeo-metadata.json', JSON.stringify(
+    done.map(i => ({ original: i.file.name, ...i.result })), null, 2
+  ));
+
+  // README
+  zip.file('README.txt',
+`AEO Image Optimizer — 변환 결과
+================================
+생성일: ${new Date().toLocaleString('ko-KR')}
+총 파일: ${done.length}장
+
+[파일 구조]
+/images/          : AEO 최적화 파일명으로 변환된 이미지
+aeo-metadata.csv  : 원본→변환 파일명 + 메타데이터 (엑셀 열기 가능)
+aeo-metadata.json : 구조화 메타데이터 (개발자용)
+
+[적용 방법]
+1. /images/ 폴더의 파일을 쇼핑몰에 업로드
+2. 이미지 등록 시 alt 태그를 aeo-metadata.csv에서 복사하여 적용
+3. 상세페이지 HTML의 <img> 태그에 alt 속성 추가
+`);
+
+  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `aeo-optimized-${Date.now()}.zip`;
+  a.click();
+  toast(`ZIP 다운로드 완료 (${done.length}장)`, 'ok');
+}
+
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function copyTxt(text) {
+  navigator.clipboard.writeText(text).then(() => toast('복사됨', 'ok'));
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast', 3000);
+}
+</script>
+</body>
+</html>
